@@ -69,7 +69,42 @@ postgres_env = {
     'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
     'HOST': os.environ.get('POSTGRES_HOST', ''),
 }
-if db_engine == 'mysql' and all(mysql_env.values()):
+database_url = os.environ.get('DATABASE_URL', '').strip()
+
+
+def _postgres_from_url(url):
+    """Build a DATABASES entry from a postgres:// URL, as offered by Neon and friends."""
+    from urllib.parse import parse_qs, unquote, urlparse
+
+    parsed = urlparse(url)
+    if parsed.scheme not in ('postgres', 'postgresql'):
+        return None
+    # Neon and other hosted providers require TLS, so default sslmode to require
+    # when the URL does not say otherwise.
+    query = parse_qs(parsed.query)
+    options = {'sslmode': query.get('sslmode', ['require'])[0]}
+    return {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': unquote(parsed.path.lstrip('/')),
+            'USER': unquote(parsed.username or ''),
+            'PASSWORD': unquote(parsed.password or ''),
+            'HOST': parsed.hostname or '',
+            'PORT': str(parsed.port or 5432),
+            'OPTIONS': options,
+            'CONN_MAX_AGE': 60,
+        }
+    }
+
+
+if database_url:
+    DATABASES = _postgres_from_url(database_url) or {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+elif db_engine == 'mysql' and all(mysql_env.values()):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
