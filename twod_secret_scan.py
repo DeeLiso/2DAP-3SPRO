@@ -11,8 +11,8 @@ PATTERNS = [
     (r'-----BEGIN [A-Z ]*PRIVATE KEY-----', 'private key block'),
     (r'\bey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b', 'JWT'),
     (r'postgres(?:ql)?://[^:\s/\'"]+:[^@\s\'"]+@[^\s\'"]+', 'database connection string'),
-    (r'\bnpg_[A-Za-z0-9]{16,}\b', 'Neon database password'),
-    (r'\bphpadmin_[A-Za-z0-9]{16,}\b', 'Supabase database password'),
+    (r'\bnpg_[A-Za-z0-9]{10,}\b', 'Neon database password'),
+    (r'\bphpadmin_[A-Za-z0-9]{10,}\b', 'Supabase database password'),
     (r'\b(eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,})', 'service token'),
     (r'(?i)\b(?:password|passwd|secret[_-]?key|api[_-]?key|token)\s*[:=]\s*[\'"][^\'"]{8,}[\'"]', 'hardcoded credential'),
 ]
