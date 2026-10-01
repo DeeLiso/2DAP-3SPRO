@@ -10,6 +10,10 @@ PATTERNS = [
     (r'\bAKIA[0-9A-Z]{16}\b', 'AWS access key id'),
     (r'-----BEGIN [A-Z ]*PRIVATE KEY-----', 'private key block'),
     (r'\bey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b', 'JWT'),
+    (r'postgres(?:ql)?://[^:\s/\'"]+:[^@\s\'"]+@[^\s\'"]+', 'database connection string'),
+    (r'\bnpg_[A-Za-z0-9]{16,}\b', 'Neon database password'),
+    (r'\bphpadmin_[A-Za-z0-9]{16,}\b', 'Supabase database password'),
+    (r'\b(eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,})', 'service token'),
     (r'(?i)\b(?:password|passwd|secret[_-]?key|api[_-]?key|token)\s*[:=]\s*[\'"][^\'"]{8,}[\'"]', 'hardcoded credential'),
 ]
 
@@ -21,7 +25,9 @@ ALLOW = re.compile(
     r'|PlainPass123!'
     r'|ClerkPass123!'
     r'|qa-tmp-pass'
-    r'|e\.g\.|example|your[-_]'
+    r'|e\.g\.|example|your[-_]|placeholder'
+    r'|postgresql://user:password@host/dbname'
+    r'|mysql://user:password@host/dbname'
     r'|os\.environ|getenv|settings\.',
     re.I,
 )
