@@ -63,6 +63,12 @@ mysql_env = {
     'PASSWORD': os.environ.get('DB_PASSWORD', ''),
     'HOST': os.environ.get('DB_HOST', ''),
 }
+postgres_env = {
+    'NAME': os.environ.get('POSTGRES_DB', ''),
+    'USER': os.environ.get('POSTGRES_USER', ''),
+    'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+    'HOST': os.environ.get('POSTGRES_HOST', ''),
+}
 if db_engine == 'mysql' and all(mysql_env.values()):
     DATABASES = {
         'default': {
@@ -73,6 +79,18 @@ if db_engine == 'mysql' and all(mysql_env.values()):
             'HOST': mysql_env['HOST'],
             'PORT': os.environ.get('DB_PORT', '3306'),
             'OPTIONS': {'charset': 'utf8mb4'},
+            'CONN_MAX_AGE': 60,
+        }
+    }
+elif db_engine == 'postgres' and all(postgres_env.values()):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': postgres_env['NAME'],
+            'USER': postgres_env['USER'],
+            'PASSWORD': postgres_env['PASSWORD'],
+            'HOST': postgres_env['HOST'],
+            'PORT': os.environ.get('POSTGRES_PORT', '5432'),
             'CONN_MAX_AGE': 60,
         }
     }

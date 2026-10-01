@@ -1,13 +1,44 @@
+databases:
+  - name: 2dap3spro-db
+    databaseName: 2dap3spro
+    user: 2dap3spro
+    plan: free
+    postgresMajorVersion: "16"
+
 services:
   - type: web
-    name: 2d-parser-engine
+    name: 2dap-3spro
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn config.wsgi:app
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate --no-input
+    startCommand: gunicorn config.wsgi:app --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /login/
     envVars:
       - key: DEBUG
         value: "False"
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: ".onrender.com"
+        value: "*"
+      - key: DB_ENGINE
+        value: postgres
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: 2dap3spro-db
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: 2dap3spro-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: 2dap3spro-db
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: 2dap3spro-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: 2dap3spro-db
+          property: port
