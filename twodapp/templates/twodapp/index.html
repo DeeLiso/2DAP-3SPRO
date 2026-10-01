@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="my" style="font-size: 16px;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>2DAP-3SPRO</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#4338ca">
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/png" href="{% static 'favicon-32x32.png' %}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{% static 'favicon-192x192.png' %}" sizes="192x192">
+    <link rel="apple-touch-icon" href="{% static 'icon-180.png' %}" sizes="180x180">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2DAP-3SPRO">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="{% static 'css/mobile.css' %}">
+    <script>
+        tailwind = { config: { darkMode: 'class' } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{% static 'css/dark.css' %}" rel="stylesheet">
+    <script src="{% static 'js/dark.js' %}"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="{% static 'js/security.js' %}" defer></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button,
+        a {
+            touch-action: manipulation;
+        }
+
+        .overflow-y-auto,
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-btn {
+            transition: transform 0.15s cubic-bezier(.4,0,.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-btn:active { transform: scale(0.88); }
+        .nav-btn::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.35) 10%, transparent 70%);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .nav-btn:active::after { opacity: 1; }
+
+        .tab-item { color: #6b7280; transition: color 0.15s, transform 0.12s; }
+        .tab-item:active { transform: scale(0.88); }
+        .tab-item.active { color: #4f46e5; }
+        .tab-item.active i { text-shadow: 0 0 8px rgba(79,70,229,0.3); }
+
+        .tab-item-sidebar.active { background-color: #eef2ff; color: #4f46e5; }
+        .tab-item-sidebar { transition: background-color 0.15s, color 0.15s, transform 0.12s; }
+        .tab-item-sidebar:active { transform: scale(0.88); }
+
+        .keypad-btn {
+            transition: transform 0.12s cubic-bezier(.4,0,.2,1), background-color 0.12s;
+        }
+        .keypad-btn:active { transform: scale(0.9); }
+
+        .input-action-btn {
+            transition: transform 0.15s cubic-bezier(.4,0,.2,1), box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .input-action-btn:active { transform: scale(0.92); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+        @keyframes pulse-red {
+
+            0%,
+            100% {
+                background-color: #fee2e2;
+            }
+
+            50% {
+                background-color: #fca5a5;
+            }
+        }
+
+        .limit-exceeded {
+            animation: pulse-red 2s infinite;
+            border-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .limit-warning {
+            background-color: #ffedd5;
+            border-color: #f97316;
+            color: #9a3412;
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* ===== Live Ticker Marquee Animation ===== */
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 18s linear infinite;
+        }
+
+        #tickerBar:hover .animate-marquee {
+            animation-play-state: paused;
+        }
+
+        /* ===== Over Limit Alerts ===== */
+        .over-alert-btn {
+            transition: all 0.2s ease;
+        }
+
+        .over-alert-btn:hover {
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+        }
+
+        .over-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 7px 12px;
+            border-bottom: 1px dashed #fecaca;
+            font-size: 12px;
+            transition: background 0.15s ease;
+        }
+
+        .over-list-item:hover {
+            background: #fef2f2;
+        }
+
+        .over-list-num {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            font-weight: 800;
+            padding: 1px 7px;
+            border-radius: 6px;
+            font-family: Consolas, monospace;
+        }
+
+        .strip-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            cursor: help;
+        }
+
+        .strip-chip:hover {
+            background: rgba(255, 255, 255, 0.32);
+            transform: scale(1.06);
+        }
+
+        /* ===== Custom Keypad ===== */
+        .keypad-container {
+            background: transparent;
+        }
+
+        /* ===== Text Caret Overlay ===== */
+        @keyframes caretBlink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        #caretSpan {
+            animation: caretBlink 1s steps(1) infinite;
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.15);
+        }
+        #caretSpan.on {
+            display: block;
+        }
+
+        .btn-tap {
+            transition: all 0.1s ease-in-out;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-tap:active {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: scale(0.95);
+        }
+
+        /* ===== 3-Box Composer ===== */
+        .box-input {
+            width: 100%;
+            padding: 0.375rem 0.3rem;
+            text-align: center;
+            border: 1.5px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.78rem;
+            background: #ffffff;
+            color: #1f2937;
+            outline: none;
+            caret-color: #6366f1;
+            touch-action: manipulation;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+        .box-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.45), 0 0 18px rgba(99, 102, 241, 0.45), 0 2px 10px rgba(99, 102, 241, 0.25);
+        }
+        .box-input.box-active {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.45), 0 0 18px rgba(99, 102, 241, 0.45), 0 2px 10px rgba(99, 102, 241, 0.25);
+            background: #eef2ff;
+        }
+        .box-wrap { position: relative; }
+        .box-caret {
+            position: absolute;
+            width: 2px;
+            display: none;
+            background: #6366f1;
+            border-radius: 1px;
+            pointer-events: none;
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15);
+        }
+        .box-caret.on { display: block; animation: caretBlink 1s steps(1) infinite; }
+    </style>
+
+<body class="text-gray-800 antialiased min-h-screen flex flex-col bg-gray-50 lg:pl-16">
+
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16 gap-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
+                    <span class="font-bold text-sm sm:text-xl tracking-tight truncate min-w-0">2DAP-3SPRO</span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-4 shrink-0">
+                    <div
+                        class="hidden text-xs sm:text-sm font-medium bg-emerald-500 text-white px-2 sm:px-3 py-1 rounded-full shadow-inner whitespace-nowrap items-center gap-1" id="winDisplay">
+                        <i class="fas fa-trophy mr-1"></i>ပေါက်သီး 0 Ks
+                    </div>
+                    <div
+                        class="text-xs sm:text-sm font-medium bg-indigo-500 px-2 sm:px-3 py-1 rounded-full shadow-inner whitespace-nowrap">
+                        Total: <span id="navTotalAmt">0</span><span class="hidden sm:inline"> Ks</span>
+                    </div>
+                    <div class="relative" id="overLimitWrap">
+                        <button id="overLimitBtn" type="button" title="Limit ကျော်နေတဲ့ ဂဏန်းများ"
+                            class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-lg shadow-red-900/30 transition transform hover:scale-105 hover:bg-red-600 over-alert-btn">
+                            <i class="fas fa-exclamation-triangle animate-pulse"></i>
+                            <span id="overLimitCount">0</span>
+                        </button>
+                        <div id="overLimitPanel"
+                            class="hidden absolute right-0 top-full mt-2 w-64 sm:w-72 bg-white text-gray-800 rounded-xl shadow-2xl border border-red-200 z-50 overflow-hidden">
+                            <div class="bg-red-600 text-white px-4 py-2 text-sm font-bold"><i
+                                    class="fas fa-exclamation-triangle mr-1"></i>Limit ကျော်နေတဲ့ ဂဏန်းများ</div>
+                            <div id="overLimitList" class="max-h-72 overflow-y-auto py-1"></div>
+                        </div>
+                    </div>
+                    <div
+                        class="flex items-center gap-1.5 sm:gap-2 bg-indigo-950 px-2 sm:px-3 py-1 rounded-lg shadow-inner">
+                        <div class="text-center">
+                            <div class="hidden sm:block text-[10px] text-indigo-300 font-semibold leading-none mb-0.5">
+                                🇲🇲 Myanmar</div>
+                            <div id="clockMyanmar"
+                                class="text-xs sm:text-sm font-mono font-bold text-emerald-400 tracking-widest whitespace-nowrap leading-tight">
+                                --:--:-- --</div>
+                        </div>
+                    </div>
+                    {% if user_type == 'bettor' and bettor_username %}
+                    <span class="flex items-center gap-1 text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">
+                        <i class="fas fa-user-circle"></i> {{ bettor_username }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Live Ticker -->
+    <div id="tickerBar" class="bg-slate-800 text-emerald-300 overflow-hidden whitespace-nowrap shadow-md">
+        <div id="tickerContent"
+            class="inline-block py-2 px-4 text-sm sm:text-base font-bold tracking-wide animate-marquee">
+            Thai 2D Live: <span id="tickerResult" class="text-white font-extrabold">--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; SET: <span id="tickerSet" class="text-white font-extrabold">--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; VALUE: <span id="tickerValue" class="text-white font-extrabold">--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; မြန်မာစံတော်: <span id="tickerTime" class="text-white font-extrabold">--:--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; <span id="tickerNext" class="text-amber-300">--</span>
+        </div>
+    </div>
+
+    <!-- Bottom Tab Bar (Mobile) -->
+    <div id="mobileNav" class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] lg:hidden" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+        <div class="flex items-center justify-around px-1">
+            <a href="/bet/?type={{ user_type|default:'dealer' }}" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="home">
+                <i class="fas fa-home text-[18px]"></i>
+                <span class="leading-none">Home</span>
+            </a>
+            {% if user_type != 'bettor' %}
+            <a href="/records/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="records">
+                <i class="fas fa-list-ol text-[18px]"></i>
+                <span class="leading-none">မှတ်တမ်း</span>
+            </a>
+            <a href="/ledger/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="ledger">
+                <i class="fas fa-th text-[18px]"></i>
+                <span class="leading-none">Ledger</span>
+            </a>
+
+            <a href="/chat/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="chat">
+                <i class="fas fa-comments text-[18px]"></i>
+                <span class="leading-none">Chat</span>
+            </a>
+            <a href="/settings/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="settings">
+                <i class="fas fa-cog text-[18px]"></i>
+                <span class="leading-none">Settings</span>
+            </a>
+            {% else %}
+            <a href="/bet/records/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="records">
+                <i class="fas fa-list-ol text-[18px]"></i>
+                <span class="leading-none">မှတ်တမ်း</span>
+            </a>
+            <a href="/bet/chat/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="chat">
+                <i class="fas fa-comments text-[18px]"></i>
+                <span class="leading-none">Chat</span>
+            </a>
+            <a href="/bet/settings/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="settings">
+                <i class="fas fa-cog text-[18px]"></i>
+                <span class="leading-none">Settings</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <aside id="desktopSidebar" class="hidden lg:flex fixed left-0 top-14 bottom-0 w-16 bg-white border-r border-gray-200 z-40 flex-col items-center py-4 gap-1">
+        <a href="/bet/?type={{ user_type|default:'dealer' }}" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="home" title="Home">
+            <i class="fas fa-home text-base"></i>
+        </a>
+        {% if user_type != 'bettor' %}
+        <a href="/records/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="records" title="မှတ်တမ်း">
+            <i class="fas fa-list-ol text-base"></i>
+        </a>
+        <a href="/ledger/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="ledger" title="Ledger">
+            <i class="fas fa-th text-base"></i>
+        </a>
+
+        <a href="/chat/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition" data-page="chat" title="Chat">
+            <i class="fas fa-comments text-base"></i>
+        </a>
+        <a href="/settings/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition" data-page="settings" title="Settings">
+            <i class="fas fa-cog text-base"></i>
+        </a>
+        {% else %}
+        <a href="/bet/records/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="records" title="မှတ်တမ်း">
+            <i class="fas fa-list-ol text-base"></i>
+        </a>
+        <a href="/bet/chat/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition" data-page="chat" title="Chat">
+            <i class="fas fa-comments text-base"></i>
+        </a>
+        <a href="/bet/settings/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition" data-page="settings" title="Settings">
+            <i class="fas fa-cog text-base"></i>
+        </a>
+        {% endif %}
+    </aside>
+
+    <!-- Over Limit Alert Strip -->
+    <div id="overLimitStrip" class="hidden bg-red-600 text-white overflow-x-auto shadow-md">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 flex items-center gap-3">
+            <span class="font-bold text-xs sm:text-sm whitespace-nowrap shrink-0"><i
+                    class="fas fa-exclamation-triangle animate-pulse mr-1"></i>Limit ကျော်နေသည်:</span>
+            <div id="overLimitStripList" class="flex gap-2 whitespace-nowrap py-0.5"></div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6">
+
+        <!-- Left Panel: Input Area -->
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
+            <div class="bg-white rounded-xl shadow-md p-4 flex flex-col flex-grow border border-gray-100">
+                <div class="flex items-center justify-between mb-2">
+                    <label for="viberInput" class="block text-sm font-bold text-gray-700">
+                        <i class="fab fa-viber text-purple-600 mr-1"></i> Viber စာရင်း ထည့်ရန်
+                    </label>
+                    <button type="button" id="pasteToggleBtn"
+                        class="text-[11px] font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg px-2.5 py-1.5 transition flex items-center gap-1.5">
+                        <i class="fas fa-paste"></i> Paste
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <div
+                        class="flex items-center flex-1 basis-40 min-w-[130px] border border-gray-300 rounded-lg bg-white overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500">
+                        <span class="px-2 text-gray-400"><i class="fas fa-user"></i></span>
+                        <input id="bettorNameInput" type="text" placeholder="ထိုးသူအမည်" value="{{ bettor_name }}"
+                            class="w-full p-2 outline-none text-sm">
+                    </div>
+                    <div
+                        class="flex items-center flex-1 basis-28 min-w-[120px] border border-gray-300 rounded-lg bg-white overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500">
+                        <span class="px-2 text-gray-400"><i class="fas fa-calendar"></i></span>
+                        <input id="bettorDateInput" type="date" value="{{ bettor_date }}"
+                            class="w-full p-2 outline-none text-sm">
+                    </div>
+                </div>
+
+                <span id="hotStatus" class="block text-xs font-semibold mb-2"></span>
+
+                <div class="mb-2 select-none" id="composerBoxes">
+                    <div class="composer-row flex items-stretch gap-1.5 sm:gap-2">
+                        <div class="flex flex-col gap-1 items-stretch flex-1 min-w-0">
+                            <label for="numBox" class="text-[9px] sm:text-[10px] font-bold text-gray-500 text-center">ဂဏန်း</label>
+                            <div class="box-wrap">
+                                <input id="numBox" type="text" readonly inputmode="none" autocomplete="off" placeholder="12,14,27" class="box-input num-box">
+                                <span class="box-caret"></span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1 items-stretch flex-1 min-w-0">
+                            <label for="formBox" class="text-[9px] sm:text-[10px] font-bold text-gray-500 text-center">Formula</label>
+                            <div class="box-wrap">
+                                <input id="formBox" type="text" readonly inputmode="none" autocomplete="off" placeholder="ခွေ" class="box-input form-box">
+                                <span class="box-caret"></span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1 items-stretch flex-1 min-w-0">
+                            <label for="amtBox" class="text-[9px] sm:text-[10px] font-bold text-gray-500 text-center">ငွေ (Ks)</label>
+                            <div class="box-wrap">
+                                <input id="amtBox" type="text" readonly inputmode="none" autocomplete="off" placeholder="500" class="box-input amt-box">
+                                <span class="box-caret"></span>
+                            </div>
+                        </div>
+                    <div class="flex flex-col gap-1.5 items-center justify-center">
+                        <button type="button" id="composerAddBtn"
+                            class="btn-tap w-9 h-9 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 shadow-md hover:shadow-lg transition flex items-center justify-center text-base">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" id="composerClearBtn"
+                            class="btn-tap w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition flex items-center justify-center text-sm">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                    </div>
+                    </div>
+                </div>
+
+                <div id="pasteArea" class="relative w-full border border-transparent hidden">
+                    <textarea id="viberInput" readonly
+                        class="w-full min-h-[56px] max-h-32 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border resize-y font-mono text-xs"
+                        placeholder="Paste Viber Text Here — Viber ကူးထည့်ရန်. Paste ပြီး ပိတ် (×) နှိပ်ပါ"></textarea>
+                    <div id="caretMirror" aria-hidden="true"
+                        class="absolute inset-0 overflow-hidden pointer-events-none invisible p-2 font-mono text-xs whitespace-pre-wrap break-words border border-transparent"></div>
+                    <span id="caretSpan"
+                        class="absolute w-[2px] bg-indigo-600 pointer-events-none hidden"></span>
+                </div>
+                <div class="flex items-center justify-between mt-1">
+                    <span id="numCounter" class="text-xs font-semibold text-gray-500"></span>
+                    <span id="numWarning" class="text-xs font-bold text-red-600 hidden">30 ထက် ကျော်နေပါသည်</span>
+                </div>
+
+                <div class="mt-3 grid grid-cols-1 gap-1.5 sm:gap-2">
+                    <button id="btnCalculate"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm leading-tight py-2 px-1 rounded-lg shadow transition duration-200">
+                        <i class="fas fa-calculator mr-1"></i><span class="break-words">စာရင်းပေါင်းမည်</span>
+                    </button>
+                </div>
+
+                <!-- Keypad -->
+                <div class="keypad-container mt-3 rounded-2xl border border-indigo-100/80 bg-gradient-to-b from-white via-indigo-50/40 to-indigo-50/70 p-2.5 shadow-sm">
+                    <div class="grid grid-cols-5 gap-y-2 gap-x-1.5 text-center items-center select-none">
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ခွေ">ခွေ</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ခွေပူး">ခွေပူး</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="အပူး">အပူး</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ပါဝါ">ပါဝါ</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ကို">ကို</button>
+
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="7">7</button>
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="8">8</button>
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="9">9</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="နက္ခတ်">နက္ခတ်</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ကပ်">ကပ်</button>
+
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="4">4</button>
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="5">5</button>
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="6">6</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ထိပ်">ထိပ်</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ဘရိတ်">ဘရိတ်</button>
+
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="1">1</button>
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="2">2</button>
+                        <button type="button" class="btn-tap text-xl font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="3">3</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="နောက်">နောက်</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="ပါတ်">ပါတ်</button>
+
+                        <button type="button" class="btn-tap text-[19px] font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="0">0</button>
+                        <button type="button" class="btn-tap text-[19px] font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="00">00</button>
+                        <button type="button" class="btn-tap text-[19px] font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num="000">000</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:shadow-sm transition"
+                            data-key="r">R</button>
+                        <button type="button" class="btn-tap text-[13px] font-bold py-2 keypad-formula rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition"
+                            data-key="ညီကို">ညီကို</button>
+
+                        <button type="button" id="keypadOkBtn"
+                            class="btn-tap text-[14px] font-bold py-2.5 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition">ဒဲ့</button>
+                        <button type="button" id="keypadDelBtn"
+                            class="btn-tap text-[14px] font-bold py-2.5 col-span-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition">Del</button>
+                        <button type="button" id="keypadSpaceBtn"
+                            class="btn-tap text-[14px] font-bold py-2.5 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition">Space</button>
+                        <button type="button" class="btn-tap text-[19px] font-bold py-2.5 keypad-num rounded-xl bg-white text-teal-600 hover:bg-teal-50 border border-indigo-100/60 shadow-sm transition hover:shadow"
+                            data-num=",">,</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Ledger Grid -->
+        <div class="w-full lg:w-2/3 flex flex-col gap-4">
+
+            <!-- Records Cards (hidden for bettor/player) -->
+            {% if user_type != 'bettor' %}
+            <div class="w-full bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-list-ol mr-2 text-indigo-500"></i>
+                        မှတ်တမ်းစာရင်း (Records)</h2>
+                    <span class="text-xs text-gray-500 font-medium">Primary Key အလိုအလျောက် စဉ်တိုး</span>
+                </div>
+                <div class="max-h-96 overflow-y-auto pr-1">
+                    <div id="recordsBody" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <script>
+        // ===== Myanmar Digital Clock =====
+        function formatTime12(timezone) {
+            const now = new Date();
+            const options = {
+                timeZone: timezone,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            return now.toLocaleTimeString('en-US', options);
+        }
+        function updateClocks() {
+            document.getElementById('clockMyanmar').textContent = formatTime12('Asia/Yangon');
+        }
+        updateClocks();
+        setInterval(updateClocks, 1000);
+
+        // ===== Thai 2D Live (synced with Myanmar time) =====
+        const MYANMAR_OFFSET_SEC = 1800;
+        const FALLBACK_DRAWS = ['11:00:00', '12:01:00', '15:00:00', '16:30:00'];
+        const tickerData = { result: '--', set: '--', value: '--', time: '', status: 'loading' };
+        let drawSchedule = [];
+        let lastDrawKey = null;
+
+        const pad2 = (n) => String(n).padStart(2, '0');
+
+        function myanmarNowSeconds() {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Yangon',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).formatToParts(new Date());
+            const get = (type) => Number(parts.find((p) => p.type === type).value);
+            return get('hour') * 3600 + get('minute') * 60 + get('second');
+        }
+
+        function thaiToMyanmarSeconds(thaiTime) {
+            const m = String(thaiTime || '').match(/^(\d{1,2}):(\d{2})/);
+            if (!m) return null;
+            return (Number(m[1]) * 3600 + Number(m[2]) * 60 - MYANMAR_OFFSET_SEC + 86400) % 86400;
+        }
+
+        function formatClock(totalSeconds) {
+            const t = ((totalSeconds % 86400) + 86400) % 86400;
+            return `${pad2(Math.floor(t / 3600))}:${pad2(Math.floor((t % 3600) / 60))}`;
+        }
+
+        function buildSchedule(results) {
+            const fromApi = (results || [])
+                .map((r) => thaiToMyanmarSeconds(r.time))
+                .filter((v) => v !== null);
+            if (fromApi.length) return Array.from(new Set(fromApi)).sort((a, b) => a - b);
+            return FALLBACK_DRAWS.map(thaiToMyanmarSeconds);
+        }
+
+        function drawState() {
+            const now = myanmarNowSeconds();
+            let current = null;
+            let next = null;
+            drawSchedule.forEach((t) => {
+                if (t <= now) current = t;
+                else if (next === null) next = t;
+            });
+            if (next === null && drawSchedule.length) next = drawSchedule[0] + 86400;
+            return { now: now, current: current, next: next };
+        }
+
+        function updateTicker() {
+            const st = drawState();
+            document.getElementById('tickerResult').textContent = tickerData.result;
+            document.getElementById('tickerSet').textContent = tickerData.set;
+            document.getElementById('tickerValue').textContent = tickerData.value;
+            document.getElementById('tickerTime').textContent =
+                st.current !== null ? formatClock(st.current) : '--:--';
+
+            const nextEl = document.getElementById('tickerNext');
+            if (tickerData.status === 'closed') {
+                nextEl.textContent = 'ပိတ်နေပါတယ်';
+            } else if (st.next !== null) {
+                const remain = Math.max(0, Math.round(st.next - st.now));
+                const h = Math.floor(remain / 3600);
+                const m = Math.floor((remain % 3600) / 60);
+                const s = remain % 60;
+                nextEl.textContent =
+                    `နောက်ဆုံး ${formatClock(st.next)} ထွက်မည် (${h > 0 ? h + 'h ' : ''}${pad2(m)}:${pad2(s)})`;
+            } else {
+                nextEl.textContent = '--';
+            }
+        }
+
+        const drawNums = { noon: '--', evening: '--' };
+        async function fetchLiveData() {
+            try {
+                const res = await fetch('/api/live');
+                const data = await res.json();
+                if (data.ok) {
+                    tickerData.result = data.result || '--';
+                    tickerData.set = data.set || '--';
+                    tickerData.value = data.value || '--';
+                    tickerData.time = data.time || '';
+                    tickerData.status = tickerData.result !== '--' ? 'live' : 'closed';
+
+                    const results = data.today_results || [];
+                    drawSchedule = buildSchedule(results);
+                    lastDrawKey = String(drawState().current);
+
+                    const noon = results.find((r) => String(r.time).startsWith('12:'));
+                    const evening = results.find((r) => String(r.time).startsWith('16:30'));
+                    const newNoon = noon ? (noon.result || '--') : '--';
+                    const newEvening = evening ? (evening.result || '--') : '--';
+                    const changed = newNoon !== drawNums.noon || newEvening !== drawNums.evening;
+                    drawNums.noon = newNoon;
+                    drawNums.evening = newEvening;
+                    if (changed) updateWinDisplay();
+                }
+            } catch (e) {
+                // API unreachable - keep last known values
+            }
+            updateTicker();
+        }
+        drawSchedule = buildSchedule(null);
+        updateTicker();
+        fetchLiveData();
+        setInterval(fetchLiveData, 30000);
+        setInterval(() => {
+            const key = String(drawState().current);
+            if (lastDrawKey !== null && key !== lastDrawKey) {
+                lastDrawKey = key;
+                if (tickerData.status !== 'closed') fetchLiveData();
+            }
+            updateTicker();
+        }, 1000);
+
+        // ===== State (initialized from server) =====
+        let ledger = {{ ledger_json| safe }};
+        let globalLimit = {{ global_limit }};
+        let specificLimits = {{ specific_limits_json| safe }};
+        let totalAmount = {{ total_amount }};
+        let validLinesCount = {{ valid_lines }};
+
+        const CSRF = document.getElementById('csrfToken').value;
+        const logList = document.getElementById('logList');
+        const recordsBody = document.getElementById('recordsBody');
+        const bettorNameInput = document.getElementById('bettorNameInput');
+        const bettorDateInput = document.getElementById('bettorDateInput');
+        const RECORDS = {{ logs_json| safe }};
+        const USER_TYPE = "{{ user_type|escapejs }}";
+        const CURRENT_USERNAME = "{{ bettor_username|escapejs }}";
+        const PAYOUT_RATE = 80;
+
+        function updateWinDisplay() {
+            const el = document.getElementById('winDisplay');
+            if (!el) return;
+            const showForBettor = USER_TYPE === 'bettor';
+            let winTotal = 0;
+            let winCount = 0;
+            (typeof recordsList !== 'undefined' && recordsList.length ? recordsList : RECORDS).forEach((r) => {
+                if (r.is_error || r.is_canceled) return;
+                if (showForBettor && r.bettor_username !== CURRENT_USERNAME) return;
+                const t = String(r.time || '');
+                const hour = parseInt(t.slice(11, 13), 10);
+                const isAM = !isNaN(hour) && hour < 12;
+                const winNum = isAM ? drawNums.noon : drawNums.evening;
+                if (winNum && winNum !== '--' && (r.numbers || []).includes(winNum)) {
+                    winTotal += (r.amount || 0) * PAYOUT_RATE;
+                    winCount++;
+                }
+            });
+            if (winCount > 0) {
+                el.classList.remove('hidden');
+                el.innerHTML = `<i class="fas fa-trophy mr-1"></i>ပေါက်သီး ${winTotal.toLocaleString()} Ks`;
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        // ===== Over Limit Alerts =====
+        let overLimits = {{ over_limits_json| safe }};
+        function computeOverLimitsFromState(s) {
+            const items = [];
+            const limitFor = (num) => (s.specific_limits && s.specific_limits[num] !== undefined) ? s.specific_limits[num] : s.global_limit;
+            (s.ledger || []).forEach((amt, i) => {
+                const num = String(i).padStart(2, '0');
+                const limit = limitFor(num);
+                if (limit && amt >= limit) items.push({ num, amount: amt, limit, over: amt - limit });
+            });
+            return items;
+        }
+        function updateOverLimitUI() {
+            const btn = document.getElementById('overLimitBtn');
+            const panel = document.getElementById('overLimitPanel');
+            const strip = document.getElementById('overLimitStrip');
+            const stripList = document.getElementById('overLimitStripList');
+            const listEl = document.getElementById('overLimitList');
+            const itemsHtml = overLimits.map((o) => `
+                <div class="over-list-item" title="ဒီဂဏန်းကို limit ထပ်ကျော်လို့ ထပ်မလောင်းသင့်ပါ">
+                    <div class="flex flex-col gap-0.5 min-w-0">
+                        <span class="flex items-center gap-1.5">
+                            <span class="over-list-num">${o.num}</span>
+                            <span class="text-gray-600 font-semibold">${o.amount.toLocaleString()} / ${o.limit.toLocaleString()} Ks</span>
+                        </span>
+                        <span class="text-[11px] text-gray-400 truncate">
+                            <i class="fas fa-user mr-1"></i>${(o.bettors && o.bettors.length) ? o.bettors.join(', ') : '—'}
+                        </span>
+                    </div>
+                    <span class="font-bold text-red-600 whitespace-nowrap">+${o.over.toLocaleString()} Ks</span>
+                </div>
+            `).join('');
+            const stripChips = overLimits.map((o) =>
+                `<span class="strip-chip" title="နံပါတ် ${o.num}: ${o.amount.toLocaleString()}/${o.limit.toLocaleString()} Ks — +${o.over.toLocaleString()} Ks ကျော်နေသည်">${o.num} +${o.over.toLocaleString()} Ks</span>`
+            ).join('');
+
+            if (!overLimits.length) {
+                btn.classList.add('hidden');
+                btn.classList.remove('flex');
+                panel.classList.add('hidden');
+                strip.classList.add('hidden');
+                stripList.innerHTML = '';
+                return;
+            }
+            btn.classList.remove('hidden');
+            btn.classList.add('flex');
+            document.getElementById('overLimitCount').textContent = overLimits.length;
+            listEl.innerHTML = itemsHtml;
+            stripList.innerHTML = stripChips;
+            strip.classList.remove('hidden');
+        }
+        document.getElementById('overLimitBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('overLimitPanel').classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => {
+            document.getElementById('overLimitPanel').classList.add('hidden');
+        });
+        updateOverLimitUI();
+
+        // ===== API helper =====
+        async function post(url, data) {
+            const body = new URLSearchParams();
+            for (const [k, v] of Object.entries(data)) body.append(k, v);
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF },
+                body
+            });
+            return res.json();
+        }
+
+        function applyState(state) {
+            ledger = state.ledger;
+            globalLimit = state.global_limit;
+            specificLimits = state.specific_limits;
+            totalAmount = state.total_amount;
+            validLinesCount = state.valid_lines;
+            overLimits = computeOverLimitsFromState(state);
+            updateOverLimitUI();
+            updateUI();
+        }
+
+        // ===== Stats =====
+        function updateUI() {
+            document.getElementById('navTotalAmt').textContent = totalAmount.toLocaleString();
+        }
+
+        // ===== Logs =====
+        function logMessage(msg, type = 'info') {
+            if (!logList) return;
+            const li = document.createElement('li');
+            li.className = 'py-1 border-b border-gray-100 last:border-0 break-words';
+            if (type === 'error') {
+                li.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i> <span class="text-red-600 font-medium">Ignored/Invalid:</span> ${msg}`;
+            } else if (type === 'success') {
+                li.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i> ${msg}`;
+            } else {
+                li.textContent = msg;
+            }
+            logList.prepend(li);
+        }
+
+        function initLogs() {
+            RECORDS.forEach((l) => {
+                if (l.is_error) {
+                    logMessage(l.original, 'error');
+                } else {
+                    logMessage(`Added: [${l.formula}] ${l.count} numbers x ${l.amount} Ks`, 'success');
+                }
+            });
+        }
+
+        // ===== Records Cards (grouped by bettor name) =====
+        function extractBetNumber(r) {
+            const orig = String(r.original || '').replace(/[၊။]+/g, ',');
+            const digits = orig.match(/\d+/g);
+            if (!digits || digits.length === 0) return '—';
+            const nums = digits.length > 1 ? digits.slice(0, -1) : [];
+            return nums.length ? nums.join(', ') : '—';
+        }
+
+        let recordsList = RECORDS.slice();
+
+        function addRecordCard(name, records) {
+            let total = 0;
+            const rows = records.map((r) => {
+                const sub = r.count * r.amount;
+                total += sub;
+                const num = extractBetNumber(r);
+                return `
+                    <div class="flex items-center justify-between gap-2 py-1">
+                        <span class="text-xs text-gray-700 font-medium break-words">
+                            <span class="font-bold text-gray-800">${num}</span>
+                            <span class="inline-block bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded mx-1">${r.formula}</span>
+                            @ ${r.amount.toLocaleString()} Ks
+                        </span>
+                        <span class="font-bold text-gray-800 whitespace-nowrap">${sub.toLocaleString()} Ks</span>
+                    </div>
+                `;
+            }).join('');
+
+            const last = records[records.length - 1];
+            const t = last ? last.time : '';
+            const m = t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2}:\d{2})/);
+            const dt = m ? `${m[3]}/${m[2]}/${m[1]} · ${m[4]}` : (t || '—');
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl border border-gray-200 shadow-sm p-3 flex flex-col gap-1.5 transition hover:shadow-md';
+            card.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-semibold text-gray-400">ထိုးသူအမည်</span>
+                    <span class="font-bold text-gray-800 truncate"><i class="fas fa-user mr-1 text-indigo-400 text-xs"></i>${name}</span>
+                </div>
+                <div class="flex flex-col border-t border-gray-100 pt-1.5">${rows}</div>
+                <div class="flex items-center justify-between border-t border-gray-200 pt-1.5">
+                    <span class="text-[11px] font-semibold text-gray-400">Total Amount</span>
+                    <span class="font-bold text-green-700 whitespace-nowrap">${total.toLocaleString()} Ks</span>
+                </div>
+                <div class="text-[10px] text-gray-400 font-mono"><i class="far fa-calendar-alt mr-1"></i>${dt}</div>
+            `;
+            recordsBody.appendChild(card);
+        }
+
+        function renderRecords() {
+            if (!recordsBody) return;
+            recordsBody.innerHTML = '';
+            const byName = new Map();
+            recordsList.forEach((r) => {
+                if (r.is_error) return;
+                const key = r.bettor_name || '—';
+                if (!byName.has(key)) byName.set(key, []);
+                byName.get(key).push(r);
+            });
+            byName.forEach((records) => {
+                addRecordCard(records[0].bettor_name || '—', records.slice().reverse());
+            });
+            const wrap = recordsBody.closest('.max-h-96');
+            if (wrap) wrap.scrollTop = wrap.scrollHeight;
+        }
+
+        function initRecords() {
+            renderRecords();
+        }
+
+        // ===== Auto-Save Bettor Meta + Hot Numbers (stays until Clear All) =====
+        async function saveMetaAndHot() {
+            const statusEl = document.getElementById('hotStatus');
+            const parts = [];
+
+            const meta = await post('/api/save_meta', {
+                name: bettorNameInput.value,
+                date: bettorDateInput.value
+            });
+            if (meta.ok) {
+                parts.push(`ထိုးသူ: ${meta.bettor_name || '—'} · ${meta.bettor_date || '—'}`);
+            }
+
+            if (parts.length && statusEl) {
+                statusEl.textContent = 'Saved ✓ ' + parts.join(' · ');
+                statusEl.className = 'text-emerald-600 text-xs font-semibold';
+            }
+            return parts.length > 0;
+        }
+
+        // ===== Text Cleaning (dots / punctuation → standard format) =====
+        function cleanText(text) {
+            return String(text)
+                .replace(/ဒဲ့/g, ' ')
+                .replace(/၊/g, ',')
+                .replace(/။/g, ',')
+                .split('\n')
+                .map((line) => {
+                    let l = line.replace(/\.{2,}/g, '.').trim();
+                    l = l.replace(/^\.+/, '');
+                    l = l.replace(/\.+$/, '');
+                    l = l.replace(/\s\./g, ' ');
+                    l = l.replace(/\.\s/g, ' ');
+                    l = l.replace(/\.([rRအာ])/g, ' $1 ');
+                    l = l.replace(/([rRအာ])\./g, '$1 ');
+                    l = l.replace(/(\d{2}(?:\.\d{2})+)\.(\d{3,})/g, (m, a, b) => a.match(/\d{2}/g).join(', ') + ' ' + b);
+                    l = l.replace(/(\d{2}(?:\.\d{2})+)(?!\d)/g, (m) => m.match(/\d{2}/g).join(', '));
+                    l = l.replace(/,{2,}/g, ',');
+                    return l.trim();
+                })
+                .join('\n');
+        }
+
+        // ===== Calculate / Add / Delete =====
+        async function calculate(action) {
+            if (typeof commitCurrentBet === 'function') commitCurrentBet();
+            const text = document.getElementById('viberInput').value;
+            if (!text.trim()) return;
+
+            await saveMetaAndHot();
+
+            const data = await post('/api/parse', {
+                text,
+                action,
+                bettor_name: bettorNameInput.value,
+                bettor_date: bettorDateInput.value
+            });
+            if (data.ok) {
+                (data.logs || []).forEach((l) => {
+                    if (l.is_error) {
+                        logMessage(l.original, 'error');
+                    } else if (action === 'delete') {
+                        logMessage(`Removed: [${l.formula}] ${l.count} numbers x ${l.amount} Ks`, 'info');
+                    } else {
+                        logMessage(`Added: [${l.formula}] ${l.count} numbers x ${l.amount} Ks`, 'success');
+                    }
+                    if (!l.is_error) recordsList.push(l);
+                });
+                renderRecords();
+                updateWinDisplay();
+                document.getElementById('viberInput').value = '';
+                if (typeof updateCaret === 'function') updateCaret();
+                if (typeof updateNumCounter === 'function') updateNumCounter();
+                applyState(data);
+            }
+        }
+
+        document.getElementById('btnCalculate').addEventListener('click', () => calculate('add'));
+
+        // ===== Clean pasted Viber text before it reaches the parser =====
+        document.getElementById('viberInput').addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+            const cleaned = cleanText(pasted);
+            const el = document.getElementById('viberInput');
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            el.value = el.value.slice(0, start) + cleaned + el.value.slice(end);
+            el.selectionStart = el.selectionEnd = start + cleaned.length;
+            if (typeof updateCaret === 'function') updateCaret();
+            if (typeof updateNumCounter === 'function') updateNumCounter();
+            if (countOriginalNumbers(el.value) > MAX_NUMS) {
+                numWarning.classList.remove('hidden');
+                logMessage('ဂဏန်း 30 ထက် ကျော်နေပါသည် — ဖျက်ပြီး ပြန်ပါ', 'warning');
+            }
+            if (cleaned !== pasted) logMessage('Pasted text cleaned → standard format ✓', 'info');
+        });
+
+        // ===== Show / hide the paste textarea =====
+        const pasteToggle = document.getElementById('pasteToggleBtn');
+        const pasteArea = document.getElementById('pasteArea');
+        if (pasteToggle && pasteArea) {
+            pasteToggle.addEventListener('click', () => {
+                const visible = pasteArea.classList.toggle('hidden');
+                pasteToggle.innerHTML = visible
+                    ? '<i class="fas fa-times"></i> ပိတ်'
+                    : '<i class="fas fa-paste"></i> Paste';
+                if (!visible) document.getElementById('viberInput').focus();
+            });
+        }
+
+        // ===== Clean the whole field on input change (blur) =====
+        document.getElementById('viberInput').addEventListener('change', () => {
+            const el = document.getElementById('viberInput');
+            const cleaned = cleanText(el.value);
+            if (cleaned !== el.value) {
+                el.value = cleaned;
+                if (typeof updateCaret === 'function') updateCaret();
+                logMessage('Input cleaned → standard format ✓', 'info');
+            }
+        });
+
+        // ===== 3-Box Composer + Keypad (inline, below calculate button) =====
+        const keypadTarget = document.getElementById('viberInput');
+        const caretMirror = document.getElementById('caretMirror');
+        const caretSpan = document.getElementById('caretSpan');
+        const numCounter = document.getElementById('numCounter');
+        const numWarning = document.getElementById('numWarning');
+        const numBox = document.getElementById('numBox');
+        const formBox = document.getElementById('formBox');
+        const amtBox = document.getElementById('amtBox');
+        const MAX_NUMS = 30;
+        let activeBox = numBox;
+        const boxCaretPos = new WeakMap();
+
+        function readBoxSel(box) {
+            const len = box.value.length;
+            if (document.activeElement === box) {
+                return { start: box.selectionStart ?? len, end: box.selectionEnd ?? len };
+            }
+            const p = boxCaretPos.get(box) ?? len;
+            return { start: p, end: p };
+        }
+
+        function focusBox(box) {
+            box.focus({ preventScroll: true });
+            const p = boxCaretPos.get(box) ?? box.value.length;
+            try { box.setSelectionRange(p, p); } catch (err) { /* readonly input on some engines */ }
+        }
+
+        function recordBoxCaret(b) {
+            if (document.activeElement === b) boxCaretPos.set(b, b.selectionStart ?? b.value.length);
+        }
+
+        const BOX_CARET_H = 14;
+        let boxCharW = 0;
+        function updateBoxCaret(box) {
+            if (!box || box !== activeBox) return;
+            const wrap = box.closest('.box-wrap');
+            const caret = wrap ? wrap.querySelector('.box-caret') : null;
+            if (!caret) return;
+            const full = box.value;
+            const pos = (document.activeElement === box)
+                ? (box.selectionStart ?? full.length)
+                : (boxCaretPos.get(box) ?? full.length);
+            if (!full.length) { caret.className = 'box-caret'; return; }
+            measureBoxCharW();
+            const cs = getComputedStyle(box);
+            const padL = parseFloat(cs.paddingLeft);
+            const padR = parseFloat(cs.paddingRight);
+            const padT = parseFloat(cs.paddingTop);
+            const padB = parseFloat(cs.paddingBottom);
+            const bL = parseFloat(cs.borderLeftWidth);
+            const bT = parseFloat(cs.borderTopWidth);
+            const cw = box.clientWidth - padL - padR;
+            const ch2 = box.clientHeight - padT - padB;
+            const fullW = full.length * boxCharW;
+            const left = Math.max(0, (cw - fullW) / 2);
+            const x = bL + padL + left + Math.min(pos, full.length) * boxCharW;
+            const y = bT + padT + (ch2 - BOX_CARET_H) / 2;
+            caret.style.left = x + 'px';
+            caret.style.top = y + 'px';
+            caret.style.height = BOX_CARET_H + 'px';
+            caret.className = 'box-caret on';
+        }
+
+        function measureBoxCharW() {
+            if (boxCharW) return;
+            const ctx = document.createElement('canvas').getContext('2d');
+            ctx.font = getComputedStyle(numBox).font;
+            boxCharW = ctx.measureText('0').width || 8;
+        }
+
+        function boxTapCaretPos(box, clientX) {
+            const len = box.value.length;
+            if (!len) return 0;
+            measureBoxCharW();
+            const cs = getComputedStyle(box);
+            const padL = parseFloat(cs.paddingLeft);
+            const padR = parseFloat(cs.paddingRight);
+            const bL = parseFloat(cs.borderLeftWidth);
+            const cw = box.clientWidth - padL - padR;
+            const fullW = len * boxCharW;
+            const left = Math.max(0, (cw - fullW) / 2);
+            const relX = clientX - box.getBoundingClientRect().left - (bL + padL + left);
+            const p = Math.max(0, Math.min(len, Math.round(relX / boxCharW)));
+            return p;
+        }
+
+        function updateBoxCharW() {
+            boxCharW = 0;
+            measureBoxCharW();
+        }
+
+        function composerRows() {
+            return Array.from(document.querySelectorAll('#composerBoxes .composer-row'));
+        }
+
+        function boxRole(box) {
+            if (box === numBox || box.classList.contains('num-box')) return 'num';
+            if (box === formBox || box.classList.contains('form-box')) return 'form';
+            if (box === amtBox || box.classList.contains('amt-box')) return 'amt';
+            return null;
+        }
+
+        function countOriginalNumbers(text) {
+            const cleaned = text.replace(/[^\d]/g, ' ');
+            const tokens = cleaned.split(/\s+/).filter(Boolean);
+            let count = 0;
+            for (const t of tokens) {
+                if (t.length === 2) count++;
+            }
+            return count;
+        }
+
+        function totalNumbers() {
+            let n = countOriginalNumbers(keypadTarget.value);
+            composerRows().forEach((row) => {
+                const nBox = row.querySelector('.num-box');
+                if (nBox) n += countOriginalNumbers(nBox.value);
+            });
+            return n;
+        }
+
+        function updateNumCounter() {
+            const n = totalNumbers();
+            numCounter.textContent = 'ဂဏန်း ' + n + '/' + MAX_NUMS;
+            numCounter.classList.toggle('text-red-600', n >= MAX_NUMS);
+            numCounter.classList.toggle('text-gray-500', n < MAX_NUMS);
+            if (n > MAX_NUMS) {
+                numWarning.classList.remove('hidden');
+            } else {
+                numWarning.classList.add('hidden');
+            }
+        }
+
+        function setActiveBox(box) {
+            activeBox = box;
+            document.querySelectorAll('#composerBoxes .box-input').forEach((b) => b.classList.remove('box-active'));
+            box.classList.add('box-active');
+            focusBox(box);
+            updateBoxCaret(box);
+        }
+
+        const FORMULA_KEYS = ['ခွေ', 'ခွေပူး', 'အပူး', 'ပါဝါ', 'ကို', 'နက္ခတ်', 'ကပ်', 'ထိပ်', 'ဘရိတ်', 'နောက်', 'ပါတ်', 'r', 'ညီကို'];
+
+        function isAllowedInBox(box, ch) {
+            const role = boxRole(box);
+            if (role === 'num') return /^[\d,]+$/.test(ch) || ch === 'ကို' || ch === 'ကပ်';
+            if (role === 'amt') return /^\d+$/.test(ch);
+            if (role === 'form') return FORMULA_KEYS.includes(ch) || ch === ' ';
+            return true;
+        }
+
+        function sanitizeBoxValue(box) {
+            const role = boxRole(box);
+            let v = box.value;
+            if (role === 'num') v = v.replace(/ကို/g, '\u0001').replace(/ကပ်/g, '\u0002').replace(/[^\d,\u0001\u0002]/g, '').replace(/\u0001/g, 'ကို').replace(/\u0002/g, 'ကပ်');
+            else if (role === 'amt') v = v.replace(/[^\d]/g, '');
+            else if (role === 'form') v = v.split(' ').filter((t) => FORMULA_KEYS.includes(t)).join(' ');
+            if (v !== box.value) box.value = v;
+        }
+
+        function boxInsert(box, ch) {
+            if (!isAllowedInBox(box, ch)) {
+                logMessage('ဒီအကွက်မှာ ဒီစာလုံး ထည့်လို့မရပါ', 'warning');
+                return;
+            }
+            const { start, end } = readBoxSel(box);
+            box.value = box.value.slice(0, start) + ch + box.value.slice(end);
+            boxCaretPos.set(box, start + ch.length);
+            focusBox(box);
+            updateBoxCaret(box);
+            updateNumCounter();
+        }
+
+        function boxBackspace(box) {
+            const { start, end } = readBoxSel(box);
+            let p;
+            if (start === end && start > 0) {
+                box.value = box.value.slice(0, start - 1) + box.value.slice(end);
+                p = start - 1;
+            } else {
+                box.value = box.value.slice(0, start) + box.value.slice(end);
+                p = start;
+            }
+            boxCaretPos.set(box, p);
+            focusBox(box);
+            updateBoxCaret(box);
+            updateNumCounter();
+        }
+
+        function addComposerRow() {
+            const row = document.createElement('div');
+            row.className = 'composer-row flex items-stretch gap-1.5 sm:gap-2';
+            row.innerHTML = '' +
+                '<div class="flex flex-col gap-1 items-stretch flex-1 min-w-0">' +
+                '<div class="box-wrap"><input type="text" readonly inputmode="none" autocomplete="off" placeholder="12,14,27" class="box-input num-box"><span class="box-caret"></span></div>' +
+                '</div>' +
+                '<div class="flex flex-col gap-1 items-stretch flex-1 min-w-0">' +
+                '<div class="box-wrap"><input type="text" readonly inputmode="none" autocomplete="off" placeholder="ခွေ" class="box-input form-box"><span class="box-caret"></span></div>' +
+                '</div>' +
+                '<div class="flex flex-col gap-1 items-stretch flex-1 min-w-0">' +
+                '<div class="box-wrap"><input type="text" readonly inputmode="none" autocomplete="off" placeholder="500" class="box-input amt-box"><span class="box-caret"></span></div>' +
+                '</div>';
+            document.getElementById('composerBoxes').appendChild(row);
+        }
+
+        function removeComposerRow() {
+            const rows = composerRows();
+            if (rows.length > 1) {
+                rows[rows.length - 1].remove();
+            } else {
+                document.querySelectorAll('#composerBoxes .box-input').forEach((b) => { b.value = ''; boxCaretPos.set(b, 0); });
+            }
+            setActiveBox(numBox);
+            updateNumCounter();
+        }
+
+        function commitCurrentBet() {
+            const lines = [];
+            composerRows().forEach((row) => {
+                const inp = row.querySelectorAll('input');
+                const parts = [inp[0].value.trim(), inp[1].value.trim(), inp[2].value.trim()].filter(Boolean);
+                if (parts.length) lines.push(parts.join(' '));
+            });
+            if (!lines.length) return;
+            const cur = keypadTarget.value;
+            keypadTarget.value = cur ? cur.replace(/\s+$/, '') + '\n' + lines.join('\n') : lines.join('\n');
+            keypadTarget.scrollTop = keypadTarget.scrollHeight;
+            composerRows().forEach((row) => row.querySelectorAll('input').forEach((i) => {
+            i.value = '';
+            boxCaretPos.set(i, 0);
+        }));
+            setActiveBox(numBox);
+            updateCaret();
+            updateNumCounter();
+        }
+
+        const composerBoxesEl = document.getElementById('composerBoxes');
+        composerBoxesEl.addEventListener('click', (e) => {
+            const b = e.target.closest('.box-input');
+            if (b) {
+                let box = b;
+                setTimeout(() => {
+                    boxCaretPos.set(box, boxTapCaretPos(box, e.clientX));
+                    focusBox(box);
+                    updateBoxCaret(box);
+                }, 0);
+                setActiveBox(b);
+            }
+        });
+        composerBoxesEl.addEventListener('focusin', (e) => {
+            if (e.target.classList.contains('box-input')) { setActiveBox(e.target); measureBoxCharW(); }
+        });
+        composerBoxesEl.addEventListener('input', (e) => {
+            if (e.target.classList.contains('box-input')) { sanitizeBoxValue(e.target); updateBoxCaret(e.target); }
+        });
+        composerBoxesEl.addEventListener('keyup', (e) => {
+            const b = e.target.closest ? e.target.closest('.box-input') : null;
+            if (b) { recordBoxCaret(b); updateBoxCaret(b); }
+        });
+        composerBoxesEl.addEventListener('touchend', (e) => {
+            const b = e.target.closest ? e.target.closest('.box-input') : null;
+            if (b) { recordBoxCaret(b); updateBoxCaret(b); }
+        });
+        composerBoxesEl.addEventListener('keydown', (e) => {
+            const b = e.target.closest ? e.target.closest('.box-input') : null;
+            if (!b) return;
+            const len = b.value.length;
+            let p = (document.activeElement === b) ? (b.selectionStart ?? len) : (boxCaretPos.get(b) ?? len);
+            if (e.key === 'ArrowLeft') { p = Math.max(0, p - 1); e.preventDefault(); }
+            else if (e.key === 'ArrowRight') { p = Math.min(len, p + 1); e.preventDefault(); }
+            else if (e.key === 'Home') { p = 0; e.preventDefault(); }
+            else if (e.key === 'End') { p = len; e.preventDefault(); }
+            else return;
+            boxCaretPos.set(b, p);
+            b.focus({ preventScroll: true });
+            b.setSelectionRange(p, p);
+            updateBoxCaret(b);
+        });
+
+        function updateCaret() {
+            if (!caretMirror || !caretSpan) return;
+            const pos = keypadTarget.selectionStart ?? keypadTarget.value.length;
+            const text = keypadTarget.value;
+            const oldMarker = caretMirror.querySelector('#caretMarker');
+            if (oldMarker) oldMarker.parentNode.removeChild(oldMarker);
+            if (!text.length) {
+                caretSpan.classList.remove('on');
+                return;
+            }
+            caretMirror.textContent = text.slice(0, pos);
+            const marker = document.createElement('span');
+            marker.id = 'caretMarker';
+            marker.textContent = '\u200b';
+            caretMirror.appendChild(marker);
+            const mr = marker.getBoundingClientRect();
+            const base = caretMirror.getBoundingClientRect();
+            const lineH = parseFloat(getComputedStyle(caretMirror).lineHeight) || 20;
+            let left = mr.left - base.left;
+            let top = mr.top - base.top - keypadTarget.scrollTop;
+            if (mr.height === 0 && pos > 0 && mr.width === 0) {
+                left = 0; top = 0;
+            }
+            caretSpan.style.left = left + 'px';
+            caretSpan.style.top = top + 'px';
+            caretSpan.style.height = lineH + 'px';
+            caretSpan.classList.add('on');
+        }
+
+        document.querySelectorAll('.keypad-num').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const ch = btn.dataset.num;
+                if (/^\d+$/.test(ch) && totalNumbers() >= MAX_NUMS) {
+                    numWarning.classList.remove('hidden');
+                    logMessage('ဂဏန်း 30 ထက် ကျော်နေပါသည် — Del နဲ့ ဖျက်ပြီးမှ ထပ်ထည့်ပါ', 'warning');
+                    return;
+                }
+                boxInsert(activeBox, ch);
+            });
+        });
+        document.querySelectorAll('.keypad-formula').forEach((btn) => {
+            const k = btn.dataset.key;
+            btn.addEventListener('click', () => {
+                const rowBox = activeBox.closest ? activeBox.closest('.composer-row') : null;
+                const t = (k === 'ကို' || k === 'ကပ်')
+                    ? (rowBox && rowBox.querySelector('.num-box')) || numBox
+                    : (rowBox && rowBox.querySelector('.form-box')) || formBox;
+                boxInsert(t, k);
+            });
+        });
+        document.getElementById('keypadDelBtn').addEventListener('click', () => boxBackspace(activeBox));
+        document.getElementById('keypadOkBtn').addEventListener('click', () => boxInsert(activeBox, 'ဒဲ့'));
+        document.getElementById('keypadSpaceBtn').addEventListener('click', () => boxInsert(activeBox, ' '));
+
+        document.getElementById('composerAddBtn').addEventListener('click', addComposerRow);
+        document.getElementById('composerClearBtn').addEventListener('click', removeComposerRow);
+
+        keypadTarget.addEventListener('select', updateCaret);
+        keypadTarget.addEventListener('scroll', updateCaret);
+        keypadTarget.addEventListener('input', updateCaret);
+        keypadTarget.addEventListener('click', updateCaret);
+        keypadTarget.addEventListener('touchend', updateCaret);
+        keypadTarget.addEventListener('keyup', updateCaret);
+        document.addEventListener('selectionchange', () => {
+            if (document.activeElement === keypadTarget) updateCaret();
+            const a = document.activeElement;
+            if (a && a.classList && a.classList.contains('box-input')) {
+                boxCaretPos.set(a, a.selectionStart ?? a.value.length);
+                updateBoxCaret(a);
+            }
+        });
+        window.addEventListener('resize', () => {
+            boxCharW = 0;
+            updateCaret();
+            updateBoxCaret(activeBox);
+        });
+
+        keypadTarget.addEventListener('keydown', (e) => {
+            if (e.target !== keypadTarget) return;
+            const len = keypadTarget.value.length;
+            const start = keypadTarget.selectionStart ?? len;
+            const end = keypadTarget.selectionEnd ?? len;
+            let moved = null;
+            if (e.key === 'ArrowLeft') {
+                moved = Math.max(0, start - 1);
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                moved = Math.min(len, end + 1);
+                e.preventDefault();
+            } else if (e.key === 'Home') {
+                moved = 0;
+                e.preventDefault();
+            } else if (e.key === 'End') {
+                moved = len;
+                e.preventDefault();
+            }
+            if (moved !== null) {
+                keypadTarget.focus();
+                keypadTarget.selectionStart = keypadTarget.selectionEnd = moved;
+                updateCaret();
+            }
+        });
+
+        // ===== Clear All =====
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        if (clearAllBtn) clearAllBtn.addEventListener('click', async () => {
+            const data = await post('/api/clear_all', {});
+            if (data.ok) {
+                if (logList) logList.innerHTML = '<li class="text-gray-400 italic">Data cleared.</li>';
+                if (recordsBody) recordsBody.innerHTML = '';
+                recordsList = [];
+                bettorNameInput.value = '';
+                bettorDateInput.value = '';
+                applyState(data);
+            }
+        });
+
+        // ===== Init =====
+        initLogs();
+        initRecords();
+        updateWinDisplay();
+        setActiveBox(numBox);
+        updateNumCounter();
+
+        // ===== Active Tab Highlight =====
+        (function() {
+            const path = location.pathname;
+            const pageMap = {
+                '/bet/': 'home',
+                '/records/': 'records',
+                '/bet/records/': 'records',
+                '/ledger/': 'ledger',
+                '/chat/': 'chat',
+                '/bet/chat/': 'chat',
+                '/settings/': 'settings',
+                '/bet/settings/': 'settings'
+            };
+            let active = 'home';
+            for (const [p, v] of Object.entries(pageMap)) {
+                if (path === p || path.startsWith(p + '?')) { active = v; break; }
+            }
+            document.querySelectorAll('.tab-item[data-page]').forEach(el => {
+                if (el.dataset.page === active) el.classList.add('active');
+            });
+            document.querySelectorAll('.tab-item-sidebar[data-page]').forEach(el => {
+                if (el.dataset.page === active) el.classList.add('active');
+            });
+        })();
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("/sw.js")
+                    .then((reg) => console.log('SW registered:', reg.scope))
+                    .catch((err) => console.error('SW registration failed:', err));
+            });
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="w-full mt-auto bg-slate-900 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:pb-2 flex flex-row items-center justify-center gap-3">
+            <a href="https://github.com/DeeLiso" target="_blank" rel="noopener noreferrer" title="GitHub"
+                class="flex items-center justify-center w-7 h-7 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                <i class="fab fa-github text-sm"></i>
+            </a>
+            <a href="viber://chat?number=%2B959446534581" title="Viber"
+                class="flex items-center justify-center w-7 h-7 rounded-full bg-purple-700 hover:bg-purple-600 text-white transition">
+                <i class="fab fa-viber text-sm"></i>
+            </a>
+        </div>
+    </footer>
+</body>
+
+</html>

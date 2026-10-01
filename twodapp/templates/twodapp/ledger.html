@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="my" style="font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Ledger (00-99)</title>
+    <script>
+        tailwind = { config: { darkMode: 'class' } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{% static 'css/dark.css' %}" rel="stylesheet">
+    <script src="{% static 'js/dark.js' %}"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="{% static 'js/security.js' %}" defer></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        button, a {
+            touch-action: manipulation;
+        }
+        .overflow-y-auto, .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { background-color: #fee2e2; }
+            50% { background-color: #fca5a5; }
+        }
+        .limit-exceeded {
+            animation: pulse-red 2s infinite;
+            border-color: #ef4444;
+            color: #7f1d1d;
+        }
+        .limit-warning {
+            background-color: #ffedd5;
+            border-color: #f97316;
+            color: #9a3412;
+        }
+
+        /* ===== Live Ticker Marquee Animation ===== */
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            animation: marquee 18s linear infinite;
+        }
+        #tickerBar:hover .animate-marquee {
+            animation-play-state: paused;
+        }
+
+        .tab-item { color: #6b7280; transition: color 0.15s, transform 0.12s; }
+        .tab-item:active { transform: scale(0.88); }
+        .tab-item.active { color: #4f46e5; }
+        .tab-item.active i { text-shadow: 0 0 8px rgba(79,70,229,0.3); }
+
+        .tab-item-sidebar { transition: background-color 0.15s, color 0.15s, transform 0.12s; }
+        .tab-item-sidebar:active { transform: scale(0.88); }
+        .tab-item-sidebar.active { background-color: #eef2ff; color: #4f46e5; }
+    </style>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2DAP-3SPRO">
+    <meta name="theme-color" content="#4338ca">
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/static/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/favicon-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/static/icon-180.png" sizes="180x180">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col lg:pl-16">
+
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16 gap-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
+                    <a href="/bet/?type=dealer" class="p-2 rounded-md hover:bg-indigo-500 focus:outline-none shrink-0">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <span class="font-bold text-sm sm:text-xl tracking-tight truncate min-w-0">
+                        <i class="fas fa-th mr-2"></i> Owner Ledger (00-99)
+                    </span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                    <div class="text-xs sm:text-sm font-medium bg-indigo-500 px-2 sm:px-3 py-1 rounded-full shadow-inner whitespace-nowrap">
+                        Total: <span id="navTotalAmt">0</span><span class="hidden sm:inline"> Ks</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:flex fixed left-0 top-14 bottom-0 w-16 bg-white border-r border-gray-200 z-40 flex-col items-center py-4 gap-1">
+        <a href="/bet/?type=dealer" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="home" title="Home">
+            <i class="fas fa-home text-base"></i>
+        </a>
+        <a href="/records/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="records" title="မှတ်တမ်း">
+            <i class="fas fa-list-ol text-base"></i>
+        </a>
+        <a href="/ledger/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="ledger" title="Ledger">
+            <i class="fas fa-th text-base"></i>
+        </a>
+
+        <a href="/chat/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition" data-page="chat" title="Chat">
+            <i class="fas fa-comments text-base"></i>
+        </a>
+        <a href="/settings/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition" data-page="settings" title="Settings">
+            <i class="fas fa-cog text-base"></i>
+        </a>
+    </aside>
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] lg:hidden" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+        <div class="flex items-center justify-around px-1">
+            <a href="/bet/?type=dealer" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="home">
+                <i class="fas fa-home text-[18px]"></i>
+                <span class="leading-none">Home</span>
+            </a>
+            <a href="/records/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="records">
+                <i class="fas fa-list-ol text-[18px]"></i>
+                <span class="leading-none">မှတ်တမ်း</span>
+            </a>
+            <a href="/ledger/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="ledger">
+                <i class="fas fa-th text-[18px]"></i>
+                <span class="leading-none">Ledger</span>
+            </a>
+
+            <a href="/chat/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="chat">
+                <i class="fas fa-comments text-[18px]"></i>
+                <span class="leading-none">Chat</span>
+            </a>
+            <a href="/settings/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="settings">
+                <i class="fas fa-cog text-[18px]"></i>
+                <span class="leading-none">Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Ticker -->
+    <div id="tickerBar" class="bg-slate-800 text-emerald-300 overflow-hidden whitespace-nowrap shadow-md">
+        <div id="tickerContent" class="inline-block py-2 px-4 text-sm sm:text-base font-bold tracking-wide animate-marquee">
+            Thai 2D Live: <span id="tickerResult" class="text-white font-extrabold">--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; SET: <span id="tickerSet" class="text-white font-extrabold">--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; VALUE: <span id="tickerValue" class="text-white font-extrabold">--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; မြန်မာစံတော်: <span id="tickerTime" class="text-white font-extrabold">--:--</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp; <span id="tickerNext" class="text-amber-300">--</span>
+        </div>
+    </div>
+
+    <main class="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 lg:pb-6">
+
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+                <div class="text-xs text-gray-500 font-semibold uppercase">Total Amount</div>
+                <div id="statTotal" class="text-xl font-bold text-indigo-700">0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+                <div class="text-xs text-gray-500 font-semibold uppercase">Total Bets (Lines)</div>
+                <div id="statLines" class="text-xl font-bold text-blue-600">0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+                <div class="text-xs text-gray-500 font-semibold uppercase">Over Limit Alerts</div>
+                <div id="statAlerts" class="text-xl font-bold text-red-600">0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+                <div class="text-xs text-gray-500 font-semibold uppercase">Global Limit</div>
+                <div id="statLimit" class="text-xl font-bold text-gray-700">50,000</div>
+            </div>
+        </div>
+
+        <!-- 100 Grid -->
+        <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-th mr-2 text-indigo-500"></i> Owner Ledger (00-99)</h2>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden focus-within:ring-1 focus-within:ring-orange-500">
+                        <span class="px-2 text-gray-400"><i class="fas fa-fire"></i></span>
+                        <input id="hotNumQuick" type="text" placeholder="Hot (12,34,56)" class="w-24 sm:w-32 p-1.5 outline-none text-sm font-bold">
+                    </div>
+                    <div class="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden focus-within:ring-1 focus-within:ring-orange-500">
+                        <span class="px-2 text-gray-400"><i class="fas fa-coins"></i></span>
+                        <input id="hotAmtQuick" type="number" placeholder="သီးသန့် Limit" class="w-24 sm:w-28 p-1.5 outline-none text-sm">
+                    </div>
+                    <button id="saveHotBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">
+                        <i class="fas fa-save mr-1"></i> Save
+                    </button>
+                    <span id="hotStatus" class="text-xs font-semibold"></span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 text-xs font-medium mb-4">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-gray-100 border border-gray-300"></span> Safe</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-orange-100 border border-orange-400"></span> >80%</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-100 border border-red-500"></span> Full/Over</span>
+                <span class="flex items-center gap-1">🔥 သီးသန့် Limit သတ်မှတ်ထား</span>
+                <span class="ml-auto text-gray-400 italic">Cell ကိုနှိပ်ရင် specific limit ပြင်နိုင်</span>
+            </div>
+
+            <div id="ledgerGrid" class="grid grid-cols-5 sm:grid-cols-10 gap-1.5 sm:gap-2"></div>
+
+            <!-- Cut-off List -->
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="border border-orange-200 rounded-lg p-3 bg-orange-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-bold text-orange-700">🔥 Hot Cut-off <span id="hotCutCount" class="text-xs font-semibold text-gray-500"></span></h3>
+                        <button onclick="shareCutoff('hot')" class="text-orange-400 hover:text-orange-600 transition p-1 rounded-lg hover:bg-orange-100" title="Share via Viber">
+                            <i class="fas fa-share-alt text-sm"></i>
+                        </button>
+                    </div>
+                    <div id="hotCutList" class="flex flex-wrap gap-1.5"></div>
+                    <div id="hotCutEmpty" class="text-xs text-gray-400 italic">Cut-off မရှိသေးပါ</div>
+                </div>
+                <div class="border border-red-200 rounded-lg p-3 bg-red-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-bold text-red-700">ပုံမှန် Cut-off <span id="normCutCount" class="text-xs font-semibold text-gray-500"></span></h3>
+                        <button onclick="shareCutoff('norm')" class="text-red-400 hover:text-red-600 transition p-1 rounded-lg hover:bg-red-100" title="Share via Viber">
+                            <i class="fas fa-share-alt text-sm"></i>
+                        </button>
+                    </div>
+                    <div id="normCutList" class="flex flex-wrap gap-1.5"></div>
+                    <div id="normCutEmpty" class="text-xs text-gray-400 italic">Cut-off မရှိသေးပါ</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Specific Number Modal -->
+    <div id="numberModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-80 max-w-[calc(100%-2rem)] transform scale-95 transition-transform" id="numberModalContent">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Edit Number <span id="modalNumLabel" class="text-indigo-600 text-xl"></span></h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Specific Limit</label>
+                <input type="number" id="modalLimitInput" class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-indigo-500">
+                <p class="text-xs text-gray-500 mt-1">Leave empty to use Global Limit.</p>
+            </div>
+
+            <button id="modalSaveBtn" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 font-bold transition">Save Changes</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== Live Ticker Data (Thai Stock 2D API) =====
+        const tickerData = {
+            result: '--',
+            set: '--',
+            value: '--',
+            time: '',
+            status: 'loading'
+        };
+        const MYANMAR_OFFSET_SEC = 1800;
+        const FALLBACK_DRAWS = ['11:00:00', '12:01:00', '15:00:00', '16:30:00'];
+        let drawSchedule = [];
+        const pad2 = (n) => String(n).padStart(2, '0');
+        function myanmarNowSeconds() {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Yangon',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).formatToParts(new Date());
+            const get = (type) => Number(parts.find((p) => p.type === type).value);
+            return get('hour') * 3600 + get('minute') * 60 + get('second');
+        }
+        function thaiToMyanmarSeconds(thaiTime) {
+            const m = String(thaiTime || '').match(/^(\d{1,2}):(\d{2})/);
+            if (!m) return null;
+            return (Number(m[1]) * 3600 + Number(m[2]) * 60 - MYANMAR_OFFSET_SEC + 86400) % 86400;
+        }
+        function formatClock(totalSeconds) {
+            const t = ((totalSeconds % 86400) + 86400) % 86400;
+            return `${pad2(Math.floor(t / 3600))}:${pad2(Math.floor((t % 3600) / 60))}`;
+        }
+        function buildSchedule(results) {
+            const fromApi = (results || [])
+                .map((r) => thaiToMyanmarSeconds(r.time))
+                .filter((v) => v !== null);
+            if (fromApi.length) return Array.from(new Set(fromApi)).sort((a, b) => a - b);
+            return FALLBACK_DRAWS.map(thaiToMyanmarSeconds);
+        }
+        function drawState() {
+            const now = myanmarNowSeconds();
+            let current = null;
+            let next = null;
+            drawSchedule.forEach((t) => {
+                if (t <= now) current = t;
+                else if (next === null) next = t;
+            });
+            if (next === null && drawSchedule.length) next = drawSchedule[0] + 86400;
+            return { now: now, current: current, next: next };
+        }
+        function updateTicker() {
+            const st = drawState();
+            document.getElementById('tickerResult').textContent = tickerData.result;
+            document.getElementById('tickerSet').textContent = tickerData.set;
+            document.getElementById('tickerValue').textContent = tickerData.value;
+            document.getElementById('tickerTime').textContent =
+                st.current !== null ? formatClock(st.current) : '--:--';
+            const nextEl = document.getElementById('tickerNext');
+            if (tickerData.status === 'closed') {
+                nextEl.textContent = 'ပိတ်နေပါတယ်';
+            } else if (st.next !== null) {
+                const remain = Math.max(0, Math.round(st.next - st.now));
+                const h = Math.floor(remain / 3600);
+                const m = Math.floor((remain % 3600) / 60);
+                const s = remain % 60;
+                nextEl.textContent =
+                    `နောက်ဆုံး ${formatClock(st.next)} ထွက်မည် (${h > 0 ? h + 'h ' : ''}${pad2(m)}:${pad2(s)})`;
+            } else {
+                nextEl.textContent = '--';
+            }
+        }
+        async function fetchLiveData() {
+            try {
+                const res = await fetch('/api/live');
+                const data = await res.json();
+                if (data.ok) {
+                    tickerData.result = data.result || '--';
+                    tickerData.set = data.set || '--';
+                    tickerData.value = data.value || '--';
+                    tickerData.time = data.time || '';
+                    tickerData.status = tickerData.result !== '--' ? 'live' : 'closed';
+                    drawSchedule = buildSchedule(data.today_results || []);
+                }
+            } catch (e) {
+                // API unreachable - keep last known values
+            }
+            updateTicker();
+        }
+        drawSchedule = buildSchedule(null);
+        updateTicker();
+        fetchLiveData();
+        // Poll the API every 30 seconds
+        setInterval(fetchLiveData, 30000);
+        // Keep the draw countdown in sync every second
+        setInterval(updateTicker, 1000);
+
+        let ledger = {{ ledger_json|safe }};
+        let globalLimit = {{ global_limit }};
+        let specificLimits = {{ specific_limits_json|safe }};
+        let totalAmount = {{ total_amount }};
+        let validLinesCount = {{ valid_lines }};
+
+        const CSRF = document.getElementById('csrfToken') ? document.getElementById('csrfToken').value : null;
+        const gridContainer = document.getElementById('ledgerGrid');
+
+        async function post(url, data) {
+            const body = new URLSearchParams();
+            for (const [k, v] of Object.entries(data)) body.append(k, v);
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF },
+                body
+            });
+            return res.json();
+        }
+
+        function initGrid() {
+            gridContainer.innerHTML = '';
+            for (let i = 0; i < 100; i++) {
+                const numStr = i < 10 ? '0' + i : '' + i;
+                const cell = document.createElement('div');
+                cell.className = 'border border-gray-200 rounded-lg p-2 text-center cursor-pointer transition-colors duration-200 hover:shadow-md bg-gray-50 flex flex-col justify-center min-h-[60px]';
+                cell.id = `cell-${numStr}`;
+                cell.onclick = () => openModal(numStr);
+                cell.innerHTML = `
+                    <div class="text-lg font-bold text-gray-800 leading-none flex items-center justify-center gap-0.5" id="num-${numStr}">${numStr}</div>
+                    <div class="text-xs font-semibold text-gray-500 mt-1" id="amt-${numStr}">0</div>
+                `;
+                gridContainer.appendChild(cell);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            let overLimitCount = 0;
+            const hotCuts = [];
+            const normCuts = [];
+            for (let i = 0; i < 100; i++) {
+                const numStr = i < 10 ? '0' + i : '' + i;
+                const amt = ledger[i] || 0;
+                const cell = document.getElementById(`cell-${numStr}`);
+                const numEl = document.getElementById(`num-${numStr}`);
+                const amtEl = document.getElementById(`amt-${numStr}`);
+                const isHot = specificLimits[numStr] !== undefined;
+
+                amtEl.textContent = amt > 0 ? amt.toLocaleString() : '0';
+                numEl.innerHTML = isHot
+                    ? `<span class="text-orange-500 text-xs leading-none">🔥</span>${numStr}`
+                    : numStr;
+                cell.className = 'border rounded-lg p-2 text-center cursor-pointer transition-colors duration-200 hover:shadow-md flex flex-col justify-center min-h-[60px]';
+                amtEl.className = 'text-xs font-bold mt-1';
+
+                let limit = isHot ? specificLimits[numStr] : globalLimit;
+
+                if (amt === 0) {
+                    cell.classList.add('border-gray-200', 'bg-gray-50');
+                    amtEl.classList.add('text-gray-400');
+                } else if (amt >= limit) {
+                    cell.classList.add('limit-exceeded', 'border-red-500', 'bg-red-50');
+                    amtEl.classList.add('text-red-700');
+                    overLimitCount++;
+                } else if (amt >= limit * 0.8) {
+                    cell.classList.add('limit-warning', 'border-orange-400', 'bg-orange-50');
+                    amtEl.classList.add('text-orange-700');
+                } else {
+                    cell.classList.add('border-green-300', 'bg-green-50');
+                    amtEl.classList.add('text-green-700');
+                }
+
+                cell.style.boxShadow = isHot
+                    ? "inset 0 2px 4px 0 rgba(249, 115, 22, 0.2)"
+                    : "none";
+
+                if (amt > 0 && amt >= limit) {
+                    (isHot ? hotCuts : normCuts).push({ numStr, amt, limit });
+                }
+            }
+
+            renderCutoff('hot', hotCuts);
+            renderCutoff('norm', normCuts);
+
+            document.getElementById('statTotal').textContent = totalAmount.toLocaleString();
+            document.getElementById('navTotalAmt').textContent = totalAmount.toLocaleString();
+            document.getElementById('statLines').textContent = validLinesCount;
+            document.getElementById('statAlerts').textContent = overLimitCount;
+            document.getElementById('statLimit').textContent = globalLimit.toLocaleString();
+        }
+
+        const cutoffData = { hot: [], norm: [] };
+
+        function renderCutoff(kind, items) {
+            cutoffData[kind] = items;
+            const listEl = document.getElementById(kind + 'CutList');
+            const emptyEl = document.getElementById(kind + 'CutEmpty');
+            const countEl = document.getElementById(kind + 'CutCount');
+            listEl.innerHTML = '';
+            items.forEach((c) => {
+                const pill = document.createElement('div');
+                pill.className = 'inline-flex items-center gap-1.5 bg-white border rounded-full px-2 py-0.5 text-xs font-bold border-gray-200';
+                pill.innerHTML = `
+                    <span>${c.numStr}</span>
+                    <span class="text-red-600">${c.amt.toLocaleString()}/${c.limit.toLocaleString()}</span>
+                `;
+                listEl.appendChild(pill);
+            });
+            countEl.textContent = `(${items.length})`;
+            emptyEl.style.display = items.length ? 'none' : '';
+        }
+
+        function shareCutoff(kind) {
+            const items = cutoffData[kind];
+            if (!items || !items.length) return;
+            const label = kind === 'hot' ? '🔥 Hot Cut-off' : 'ပုံမှန် Cut-off';
+            let text = label + '\n';
+            items.forEach(c => {
+                text += c.numStr + ' → ' + c.amt.toLocaleString() + '/' + c.limit.toLocaleString() + '\n';
+            });
+            text += '\n— 2DAP-3SPRO';
+
+            if (navigator.share) {
+                navigator.share({ text: text }).catch(function() {});
+            } else {
+                var viberUrl = 'viber://forward?text=' + encodeURIComponent(text);
+                var a = document.createElement('a');
+                a.href = viberUrl;
+                a.click();
+            }
+        }
+
+        // ===== Modal =====
+        const numberModal = document.getElementById('numberModal');
+        const numberModalContent = document.getElementById('numberModalContent');
+        let currentModalNum = null;
+
+        function openModal(numStr) {
+            currentModalNum = numStr;
+            document.getElementById('modalNumLabel').textContent = numStr;
+            const input = document.getElementById('modalLimitInput');
+            if (specificLimits[numStr] !== undefined) {
+                input.value = specificLimits[numStr];
+            } else {
+                input.value = '';
+                input.placeholder = `Global: ${globalLimit}`;
+            }
+            numberModal.classList.remove('hidden');
+            setTimeout(() => {
+                numberModal.classList.remove('opacity-0');
+                numberModalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            numberModal.classList.add('opacity-0');
+            numberModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                numberModal.classList.add('hidden');
+                currentModalNum = null;
+            }, 300);
+        }
+
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        document.getElementById('modalSaveBtn').addEventListener('click', async () => {
+            const val = parseInt(document.getElementById('modalLimitInput').value);
+            const data = await post('/api/set_specific_limit', {
+                num: currentModalNum,
+                limit: isNaN(val) ? '' : val
+            });
+            if (data.ok) applyState(data);
+            closeModal();
+        });
+
+        // ===== Hot Number Quick Save (multi: "12,34,56") =====
+        document.getElementById('saveHotBtn').addEventListener('click', async () => {
+            const raw = document.getElementById('hotNumQuick').value.trim();
+            const limit = parseInt(document.getElementById('hotAmtQuick').value);
+            const statusEl = document.getElementById('hotStatus');
+
+            if (!raw || isNaN(limit) || limit <= 0) {
+                statusEl.textContent = 'ဂဏန်း + Limit ထည့်ပါ!';
+                statusEl.className = 'text-red-500 text-xs font-semibold';
+                return;
+            }
+
+            const valid = [];
+            for (const part of raw.split(/[\s,၊။]+/)) {
+                const n = parseInt(part);
+                if (!isNaN(n) && n >= 0 && n <= 99) valid.push(n < 10 ? '0' + n : '' + n);
+            }
+
+            if (!valid.length) {
+                statusEl.textContent = 'နံပါတ် မမှန်ပါ (00-99)';
+                statusEl.className = 'text-red-500 text-xs font-semibold';
+                return;
+            }
+
+            let lastData = null;
+            for (const num of valid) {
+                lastData = await post('/api/set_specific_limit', { num, limit });
+            }
+            if (lastData && lastData.ok) {
+                statusEl.textContent = `🔥 ${valid.length} ခု သိမ်းပြီး ✓`;
+                statusEl.className = 'text-emerald-600 text-xs font-semibold';
+                applyState(lastData);
+                document.getElementById('hotNumQuick').value = '';
+                document.getElementById('hotAmtQuick').value = '';
+                setTimeout(() => { statusEl.textContent = ''; }, 3000);
+            } else {
+                statusEl.textContent = 'သိမ်းမရပါ';
+                statusEl.className = 'text-red-500 text-xs font-semibold';
+            }
+        });
+
+        function applyState(state) {
+            ledger = state.ledger;
+            globalLimit = state.global_limit;
+            specificLimits = state.specific_limits;
+            totalAmount = state.total_amount;
+            validLinesCount = state.valid_lines;
+            updateUI();
+        }
+
+        initGrid();
+
+        // ===== Active Sidebar Tab =====
+        (function() {
+            const pageMap = {'/records/': 'records', '/ledger/': 'ledger', '/chat/': 'chat', '/settings/': 'settings'};
+            let active = '';
+            for (const [p, v] of Object.entries(pageMap)) {
+                if (location.pathname === p) { active = v; break; }
+            }
+            document.querySelectorAll('.tab-item[data-page]').forEach(el => {
+                if (el.dataset.page === active) el.classList.add('active');
+            });
+            document.querySelectorAll('.tab-item-sidebar[data-page]').forEach(el => {
+                if (el.dataset.page === active) el.classList.add('active');
+            });
+        })();
+    </script>
+
+    <!-- Footer -->
+    <footer class="w-full mt-auto bg-slate-900 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:pb-2 flex flex-row items-center justify-center gap-3">
+            <a href="https://github.com/DeeLiso" target="_blank" rel="noopener noreferrer" title="GitHub"
+               class="flex items-center justify-center w-7 h-7 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                <i class="fab fa-github text-sm"></i>
+            </a>
+            <a href="viber://chat?number=%2B959446534581" title="Viber"
+               class="flex items-center justify-center w-7 h-7 rounded-full bg-purple-700 hover:bg-purple-600 text-white transition">
+                <i class="fab fa-viber text-sm"></i>
+            </a>
+        </div>
+    </footer>
+    <script src="/static/js/pwa.js" defer></script>
+</body>
+</html>

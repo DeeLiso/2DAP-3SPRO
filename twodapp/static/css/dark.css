@@ -1,0 +1,102 @@
+/* ===== Global Dark Mode =====
+   Applied when the `dark` class is present on <html>.
+   Overrides the app's light design-system surfaces (Tailwind utility names)
+   so the ENTIRE web app goes dark with a single persisted toggle. */
+
+html.dark, html.dark body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+/* ---------- Base surfaces ---------- */
+html.dark .bg-white { background-color: #1e293b !important; }
+html.dark .bg-gray-50 { background-color: #111827 !important; }
+html.dark .bg-gray-100 { background-color: #1e293b !important; }
+html.dark .bg-gray-200 { background-color: #334155 !important; }
+html.dark .bg-gray-300 { background-color: #475569 !important; }
+html.dark .bg-slate-50 { background-color: #0f172a !important; }
+html.dark .bg-slate-100 { background-color: #1e293b !important; }
+html.dark .bg-slate-200 { background-color: #334155 !important; }
+html.dark .bg-indigo-50 { background-color: #1e293b !important; }
+html.dark .bg-indigo-100 { background-color: #312e81 !important; }
+html.dark .bg-amber-50 { background-color: #422006 !important; }
+html.dark .bg-amber-100 { background-color: #713f12 !important; }
+html.dark .bg-emerald-50 { background-color: #064e3b !important; }
+html.dark .bg-emerald-100 { background-color: #065f46 !important; }
+html.dark .bg-red-50 { background-color: #450a0a !important; }
+html.dark .bg-red-100 { background-color: #7f1d1d !important; }
+html.dark .bg-blue-50 { background-color: #1e3a8a !important; }
+html.dark .bg-blue-100 { background-color: #1e40af !important; }
+html.dark .bg-purple-50 { background-color: #3b0764 !important; }
+html.dark .bg-teal-50 { background-color: #134e4a !important; }
+
+/* ---------- Text ---------- */
+html.dark .text-gray-900, html.dark .text-gray-800, html.dark .text-gray-700,
+html.dark .text-gray-600 { color: #e2e8f0 !important; }
+html.dark .text-gray-500 { color: #94a3b8 !important; }
+html.dark .text-gray-400 { color: #64748b !important; }
+html.dark .text-slate-900, html.dark .text-slate-800, html.dark .text-slate-700,
+html.dark .text-slate-600 { color: #e2e8f0 !important; }
+html.dark .text-indigo-500, html.dark .text-indigo-600, html.dark .text-indigo-700 { color: #818cf8 !important; }
+html.dark .text-green-600, html.dark .text-green-700 { color: #34d399 !important; }
+html.dark .text-red-500, html.dark .text-red-600, html.dark .text-red-700 { color: #f87171 !important; }
+html.dark .text-amber-600, html.dark .text-amber-700 { color: #fbbf24 !important; }
+html.dark .text-blue-500, html.dark .text-blue-600, html.dark .text-blue-700 { color: #93c5fd !important; }
+html.dark .text-purple-500, html.dark .text-purple-600, html.dark .text-purple-700 { color: #c4b5fd !important; }
+html.dark .text-teal-500, html.dark .text-teal-600 { color: #5eead4 !important; }
+html.dark .text-emerald-600, html.dark .text-emerald-700 { color: #34d399 !important; }
+html.dark .text-white { color: #f1f5f9; }
+
+/* ---------- Borders ---------- */
+html.dark .border-gray-100 { border-color: #1e293b !important; }
+html.dark .border-gray-200 { border-color: #334155 !important; }
+html.dark .border-gray-300 { border-color: #475569 !important; }
+html.dark .border-slate-200 { border-color: #334155 !important; }
+html.dark .border-slate-300 { border-color: #475569 !important; }
+html.dark .border-slate-700 { border-color: #334155 !important; }
+html.dark .border-slate-800 { border-color: #1e293b !important; }
+html.dark .divide-gray-100 > *, html.dark .divide-gray-200 > * { border-color: #334155 !important; }
+
+/* ---------- Dark panels / overlays ---------- */
+html.dark .bg-slate-800 { background-color: #1e293b !important; }
+html.dark .bg-slate-900 { background-color: #0b1220 !important; }
+html.dark .bg-black\/50, html.dark .bg-gray-900\/50, html.dark .bg-black\/60 { background-color: rgba(0,0,0,0.7) !important; }
+
+/* ---------- Inputs ---------- */
+html.dark input, html.dark textarea, html.dark select {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+html.dark input::placeholder, html.dark textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* ---------- Hover / pressed states ---------- */
+html.dark .hover\:bg-gray-100:hover, html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-indigo-50:hover { background-color: #334155 !important; }
+html.dark .hover\:text-gray-600:hover, html.dark .hover\:text-gray-700:hover { color: #e2e8f0 !important; }
+
+/* ---------- Sidebar / tab active states ---------- */
+html.dark .tab-item-sidebar.active { background-color: #312e81 !important; color: #a5b4fc !important; }
+html.dark .tab-item.active { color: #a5b4fc !important; }
+
+/* ---------- Custom page classes with hardcoded light fills ---------- */
+html.dark .card { background-color: #1e293b !important; border-color: #334155 !important; }
+html.dark .row-active { background-color: #1e293b !important; }
+html.dark .row-canceled, html.dark .row-rejected { background-color: #111827 !important; }
+html.dark .row-pending { background-color: #422006 !important; }
+html.dark .num-tag { background-color: #312e81 !important; color: #a5b4fc !important; }
+html.dark .log-list, html.dark .log-container { background-color: #0f172a !important; }
+html.dark .records-card, html.dark .keypad-container { background-color: #1e293b !important; border-color: #334155 !important; }
+
+/* ---------- Tables ---------- */
+html.dark table { color: #e2e8f0 !important; }
+html.dark td { border-color: #334155 !important; }
+html.dark thead, html.dark th { background-color: #1e293b !important; color: #e2e8f0 !important; }
+
+/* ---------- Badges / chips / pills (light fills) ---------- */
+html.dark .badge, html.dark .chip, html.dark .pill {
+    background-color: #334155 !important;
+    color: #e2e8f0 !important;
+}

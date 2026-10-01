@@ -1,0 +1,30 @@
+<!doctype html>
+{% load static %}
+<html lang="my">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10221b">
+  <meta name="description" content="2DAP-3SPRO role gateway and control center">
+  <title>{% if bootstrap.screen == 'admin' %}Admin Control Center{% elif bootstrap.screen == 'login' %}Sign in{% else %}Role Gateway{% endif %} · 2DAP-3SPRO</title>
+  <link rel="preload" href="{% static 'app/assets/fonts/noto-sans-myanmar-myanmar-400-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'app/assets/fonts/ibm-plex-sans-thai-latin-400-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'app/app.css' %}?v={{ static_asset_version }}">
+  <link rel="stylesheet" href="{% static 'css/mobile.css' %}">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="2DAP-3SPRO">
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/static/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/favicon-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/static/icon-180.png" sizes="180x180">
+</head>
+<body>
+  <div id="root"></div>
+  {{ bootstrap|json_script:"twod-bootstrap" }}
+  <script src="{% static 'app/app.js' %}?v={{ static_asset_version }}" type="module"></script>
+  <script src="{% static 'js/pwa.js' %}?v={{ static_asset_version }}" defer></script>
+</body>
+</html>

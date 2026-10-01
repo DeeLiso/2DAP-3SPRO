@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="my" style="font-size: 16px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Settings</title>
+    <script>
+        tailwind = { config: { darkMode: 'class' } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f3f4f6;
+        }
+        .dark body { background-color: #0f172a; }
+        .dark .tab-item.active { color: #818cf8; }
+        .dark .tab-item-sidebar.active { background-color: #1e293b; color: #818cf8; }
+        .dark .card-dark { background-color: #1e293b; border-color: #334155; }
+        .dark .card-head-dark { background-color: #0f172a; }
+        .dark .text-main-dark { color: #e2e8f0; }
+        .dark .text-sub-dark { color: #94a3b8; }
+        .dark .border-dark { border-color: #334155; }
+        .dark .bg-elem-dark { background-color: #1e293b !important; border-color: #334155 !important; }
+        .dark .bg-elem-dark0 { background-color: #0f172a !important; border-color: #334155 !important; }
+        .tab-item { color: #6b7280; transition: color 0.15s, transform 0.12s; }
+        .tab-item:active { transform: scale(0.88); }
+        .tab-item.active { color: #6366f1; }
+        .tab-item.active i { text-shadow: 0 0 8px rgba(99,102,241,0.3); }
+        .tab-item-sidebar { transition: background-color 0.15s, color 0.15s, transform 0.12s; }
+        .tab-item-sidebar:active { transform: scale(0.88); }
+        .tab-item-sidebar.active { background-color: #eef2ff; color: #6366f1; }
+        /* Group cards */
+        .settings-group-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+            color: #6b7280; margin-bottom: 0.5rem; padding-left: 0.25rem;
+        }
+        .settings-group-title i { color: #6366f1; font-size: 0.75rem; }
+        .dark .settings-group-title { color: #94a3b8; }
+        .dark .settings-group-title i { color: #818cf8; }
+        .settings-group-body {
+            display: flex; flex-direction: column; gap: 0.625rem;
+            background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 1rem;
+            padding: 0.625rem; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+        .dark .settings-group-body { background-color: #1e293b; border-color: #334155; }
+        /* Accordion */
+        .settings-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
+        .settings-body.open { grid-template-rows: 1fr; }
+        .settings-body > div { overflow: hidden; }
+        .settings-chevron { transition: transform 0.3s ease; }
+        .settings-toggle.open .settings-chevron { transform: rotate(180deg); }
+    </style>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="2DAP-3SPRO">
+    <meta name="theme-color" content="#4338ca">
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/static/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/static/favicon-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/static/icon-180.png" sizes="180x180">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col md:pl-16">
+
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16 gap-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
+                    <a href="{% if is_bettor %}/bet/?type=bettor{% else %}/bet/?type=dealer{% endif %}" class="p-2 rounded-md hover:bg-indigo-500 focus:outline-none shrink-0">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <span class="font-bold text-sm sm:text-xl tracking-tight truncate min-w-0">
+                        <i class="fas fa-cog mr-2"></i> Settings
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:flex fixed left-0 top-14 bottom-0 w-16 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 z-40 flex-col items-center py-4 gap-1">
+        {% if is_bettor %}
+        <a href="/bet/?type=bettor" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="home" title="Home">
+            <i class="fas fa-home text-base"></i>
+        </a>
+        <a href="/bet/records/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="records" title="မှတ်တမ်း">
+            <i class="fas fa-list-ol text-base"></i>
+        </a>
+        <a href="/bet/chat/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition" data-page="chat" title="Chat">
+            <i class="fas fa-comments text-base"></i>
+        </a>
+        <a href="/bet/settings/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition active" data-page="settings" title="Settings">
+            <i class="fas fa-cog text-base"></i>
+        </a>
+        {% else %}
+        <a href="/bet/?type=dealer" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="home" title="Home">
+            <i class="fas fa-home text-base"></i>
+        </a>
+        <a href="/records/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="records" title="မှတ်တမ်း">
+            <i class="fas fa-list-ol text-base"></i>
+        </a>
+        <a href="/ledger/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition" data-page="ledger" title="Ledger">
+            <i class="fas fa-th text-base"></i>
+        </a>
+
+        <a href="/chat/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition" data-page="chat" title="Chat">
+            <i class="fas fa-comments text-base"></i>
+        </a>
+        <a href="/settings/" class="tab-item-sidebar w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-purple-50 hover:text-purple-600 transition active" data-page="settings" title="Settings">
+            <i class="fas fa-cog text-base"></i>
+        </a>
+        {% endif %}
+    </aside>
+
+    <!-- Mobile Bottom Tab Bar -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] md:hidden" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+        <div class="flex items-center justify-around px-1">
+            {% if is_bettor %}
+            <a href="/bet/?type=bettor" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="home">
+                <i class="fas fa-home text-[18px]"></i>
+                <span class="leading-none">Home</span>
+            </a>
+            <a href="/bet/records/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="records">
+                <i class="fas fa-list-ol text-[18px]"></i>
+                <span class="leading-none">မှတ်တမ်း</span>
+            </a>
+            <a href="/bet/chat/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="chat">
+                <i class="fas fa-comments text-[18px]"></i>
+                <span class="leading-none">Chat</span>
+            </a>
+            <a href="/bet/settings/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1 active" data-page="settings">
+                <i class="fas fa-cog text-[18px]"></i>
+                <span class="leading-none">Settings</span>
+            </a>
+            {% else %}
+            <a href="/bet/?type=dealer" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="home">
+                <i class="fas fa-home text-[18px]"></i>
+                <span class="leading-none">Home</span>
+            </a>
+            <a href="/records/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="records">
+                <i class="fas fa-list-ol text-[18px]"></i>
+                <span class="leading-none">မှတ်တမ်း</span>
+            </a>
+            <a href="/ledger/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="ledger">
+                <i class="fas fa-th text-[18px]"></i>
+                <span class="leading-none">Ledger</span>
+            </a>
+
+            <a href="/chat/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1" data-page="chat">
+                <i class="fas fa-comments text-[18px]"></i>
+                <span class="leading-none">Chat</span>
+            </a>
+            <a href="/settings/" class="tab-item flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl text-[10px] font-bold min-w-0 flex-1 active" data-page="settings">
+                <i class="fas fa-cog text-[18px]"></i>
+                <span class="leading-none">Settings</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-20 space-y-6">
+
+        <!-- Group: Account & Security -->
+        <section class="settings-group">
+            <h2 class="settings-group-title"><i class="fas fa-user-shield"></i> Account &amp; Security</h2>
+            <div class="settings-group-body">
+        <!-- Account -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle open w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 shrink-0">
+                    <i class="fas fa-user-circle text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Account</span>
+                    <span class="block text-[11px] text-gray-400">Username & Role</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body open">
+                <div>
+                    <div class="p-4 space-y-3 border-t border-gray-100 dark:border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Username</span>
+                            <span class="text-sm font-bold text-gray-800" id="usernameDisplay">{% if is_bettor %}{{ bettor_username|default:"Player" }}{% else %}{{ request.user.username|default:"Player" }}{% endif %}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Role</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full {% if is_owner %}bg-indigo-100 text-indigo-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                {% if is_owner %}Owner{% else %}Player{% endif %}
+                            </span>
+                        </div>
+                        {% if is_bettor %}
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Phone</span>
+                            <span class="text-sm font-bold text-gray-800">{{ bettor_account.phone|default:"—" }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Balance</span>
+                            <span class="text-sm font-bold text-emerald-600">{{ bettor_account.balance }} Ks</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if is_owner %}
+        <!-- Change Password -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900 flex items-center justify-center text-amber-500 dark:text-amber-300 shrink-0">
+                    <i class="fas fa-lock text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Change Password</span>
+                    <span class="block text-[11px] text-gray-400">Account စကားဝှက် ပြောင်းရန်</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-3 border-t border-gray-100 dark:border-slate-700">
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Current Password</label>
+                            <input id="oldPassword" type="password" placeholder="Current password"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">New Password</label>
+                            <input id="newPassword" type="password" placeholder="New password"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Confirm Password</label>
+                            <input id="confirmPassword" type="password" placeholder="Confirm new password"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition">
+                        </div>
+                        <div id="pwMsg" class="hidden text-xs font-medium rounded-lg px-3 py-2"></div>
+                        <button onclick="changePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-95">
+                            <i class="fas fa-save mr-1"></i> Save Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if bettor_hot_limits %}
+        <!-- Limit Alarm (Player) -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-red-100 dark:border-red-900/60 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/50 flex items-center justify-center text-red-600 dark:text-red-300 shrink-0">
+                    <i class="fas fa-bell text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Limit Alarm</span>
+                    <span class="block text-[11px] text-gray-400">Owner သတ်မှတ်ထားတဲ့ ဂဏန်းနဲ့ ငွေအမောင့်</span>
+                </span>
+                <span class="shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300">
+                    {{ bettor_hot_limits|length }}
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-2 border-t border-red-100 dark:border-red-900/60">
+                        <p class="text-[11px] text-red-500 dark:text-red-400">
+                            <i class="fas fa-circle-info mr-1"></i>ဒီ limit ကို owner သတ်မှတ်ထားတာဖြစ်လို့ ဖြည့်နိုင်/ပြင်ဆင်ခွင့် မရှိပါ။
+                        </p>
+                        {% for limit in bettor_hot_limits %}
+                        <div class="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-red-50/60 dark:bg-red-950/30 border border-red-100 dark:border-red-900/60">
+                            <span class="flex items-center gap-2 min-w-0">
+                                <i class="fas fa-bell text-xs text-red-500 dark:text-red-400 shrink-0"></i>
+                                <span class="text-sm font-bold text-gray-800 dark:text-gray-100">ဂဏန်း {{ limit.num }}</span>
+                            </span>
+                            <span class="shrink-0 text-sm font-bold text-red-600 dark:text-red-300 whitespace-nowrap">{{ limit.amount_display }} Ks</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if is_bettor %}
+        <!-- Change Password (Player) -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900 flex items-center justify-center text-amber-500 dark:text-amber-300 shrink-0">
+                    <i class="fas fa-lock text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Change Password</span>
+                    <span class="block text-[11px] text-gray-400">Player စကားဝှက် ပြောင်းရန်</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-3 border-t border-gray-100 dark:border-slate-700">
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Current Password</label>
+                            <input id="bettorOldPassword" type="password" placeholder="Current password"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">New Password</label>
+                            <input id="bettorNewPassword" type="password" placeholder="New password"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Confirm Password</label>
+                            <input id="bettorConfirmPassword" type="password" placeholder="Confirm new password"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none transition">
+                        </div>
+                        <div id="bettorPwMsg" class="hidden text-xs font-medium rounded-lg px-3 py-2"></div>
+                        <button onclick="bettorChangePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-95">
+                            <i class="fas fa-save mr-1"></i> Save Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+            </div>
+        </section>
+
+        {% if is_owner and user.is_superuser %}
+        <!-- Group: Administration -->
+        <section class="settings-group">
+            <h2 class="settings-group-title"><i class="fas fa-user-cog"></i> Administration</h2>
+            <div class="settings-group-body">
+        <!-- Operator Panel -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-indigo-200 dark:border-indigo-800 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 shrink-0">
+                    <i class="fas fa-user-cog text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Operator Panel</span>
+                    <span class="block text-[11px] text-gray-400">Owner & Player အကောင့် စီမံခန့်ခွဲမှု</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-t border-indigo-100 dark:border-slate-700">
+                        <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 shrink-0">
+                            <i class="fas fa-user-shield text-lg"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100">Owner & Player အကောင့် စီမံခန့်ခွဲမှု</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Owner ဖွင့်ရန် / ပြင်ရန် / ဖျက်ရန်၊ Password ပြောင်းရန် နှင့် Player အကောင့်များ စီမံခန့်ခွဲရန်</div>
+                        </div>
+                        <a href="/app/admin/" class="shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg transition active:scale-95 flex items-center gap-1.5">
+                            <i class="fas fa-external-link-alt"></i> ဖွင့်မည်
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Players -->
+
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-emerald-200 dark:border-emerald-800 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shrink-0">
+                    <i class="fas fa-user-plus text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Players</span>
+                    <span class="block text-[11px] text-gray-400">Player အကောင့် စီမံခန့်ခွဲမှု</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-t border-emerald-100 dark:border-slate-700">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shrink-0">
+                            <i class="fas fa-user-plus text-lg"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100">Player အကောင့် စီမံခန့်ခွဲမှု</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Player အကောင့် ဖွင့်ရန် / ပြင်ရန် / ဖျက်ရန်</div>
+                        </div>
+                        <a href="/app/admin/?tab=players" class="shrink-0 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition active:scale-95 flex items-center gap-1.5">
+                            <i class="fas fa-external-link-alt"></i> ဖွင့်မည်
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Group: Preferences -->
+        <section class="settings-group">
+            <h2 class="settings-group-title"><i class="fas fa-sliders-h"></i> Preferences</h2>
+            <div class="settings-group-body">
+        <!-- Display -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900 flex items-center justify-center text-purple-500 dark:text-purple-300 shrink-0">
+                    <i class="fas fa-text-height text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Display</span>
+                    <span class="block text-[11px] text-gray-400">Font Size & Dark Mode</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-3 border-t border-gray-100 dark:border-slate-700">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">Font Size</label>
+                                <span id="fontSizeValue" class="text-xs font-bold text-gray-700">16px</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-font text-xs text-gray-400"></i>
+                                <input type="range" id="fontSizeSlider" min="12" max="24" value="16"
+                                    class="flex-1 h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-500">
+                                <i class="fas fa-font text-lg text-gray-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-moon text-sm text-gray-400"></i>
+                                <div>
+                                    <div class="text-xs font-semibold text-gray-500">Dark Mode</div>
+                                    <div class="text-[10px] text-gray-400" id="darkModeState">Off</div>
+                                </div>
+                            </div>
+                            <button id="darkModeToggle" type="button" aria-label="Toggle dark mode"
+                                class="relative w-11 h-6 rounded-full bg-gray-300 transition-colors duration-200 shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <span id="darkModeKnob" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </section>
+
+        {% if is_owner %}
+        <!-- Group: Data & Activity -->
+        <section class="settings-group">
+            <h2 class="settings-group-title"><i class="fas fa-database"></i> Data &amp; Activity</h2>
+            <div class="settings-group-body">
+        <!-- Operation Log -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center text-gray-500 dark:text-gray-300 shrink-0">
+                    <i class="fas fa-history text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Operation Log</span>
+                    <span class="block text-[11px] text-gray-400">မကြာသေးသော မှတ်တမ်း 200</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 max-h-72 overflow-y-auto border-t border-gray-100 dark:border-slate-700">
+                        <ul id="logList" class="text-sm space-y-1 font-mono"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if is_owner %}
+        <!-- Limit Management -->
+        <div class="settings-item bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900 flex items-center justify-center text-red-500 dark:text-red-300 shrink-0">
+                    <i class="fas fa-exclamation-triangle text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Limit Management</span>
+                    <span class="block text-[11px] text-gray-400">Global & Specific Limits</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-4 border-t border-gray-100 dark:border-slate-700">
+                        <div>
+                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Global Limit (all numbers)</label>
+                            <div class="flex gap-2">
+                                <input id="globalLimitInput" type="number" min="0" placeholder="e.g. 50000"
+                                    value="{{ global_limit }}"
+                                    class="flex-1 px-3 py-2 border border-gray-200 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-red-300 focus:border-red-400 outline-none transition">
+                                <button onclick="setGlobalLimit()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold text-sm rounded-lg transition active:scale-95 whitespace-nowrap">
+                                    <i class="fas fa-save mr-1"></i> Set
+                                </button>
+                            </div>
+                        </div>
+                        <div id="specLimitsList" class="space-y-1"></div>
+                        <div id="limitMsg" class="hidden text-xs font-medium rounded-lg px-3 py-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clear Data -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-red-200 dark:border-red-900/50 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900 flex items-center justify-center text-red-500 dark:text-red-300 shrink-0">
+                    <i class="fas fa-trash-alt text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-red-600 dark:text-red-300">Clear Data</span>
+                    <span class="block text-[11px] text-gray-400">Ledger & Record အားလုံး ဖျက်ရန်</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 border-t border-red-100 dark:border-slate-700">
+                        <p class="text-xs text-gray-500 mb-3">လက်ရှိ ledger နဲ့ record အားလုံးကို ဖျက်ပြီး Local Store (archive) ထဲ ရွှေ့ထားမယ်။</p>
+                        <button onclick="clearAllData()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-95 shadow-md">
+                            <i class="fas fa-trash-alt mr-1"></i> Clear All Data
+                        </button>
+                        <div id="clearMsg" class="hidden text-xs font-medium rounded-lg px-3 py-2 mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Local Store -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-amber-200 dark:border-amber-800 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900 flex items-center justify-center text-amber-500 dark:text-amber-300 shrink-0">
+                    <i class="fas fa-box-archive text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Local Store</span>
+                    <span class="block text-[11px] text-gray-400">Clear Data ရင် သိမ်းယူထားတဲ့ စာရင်းများ</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-3 border-t border-amber-100 dark:border-slate-700">
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-gray-50 dark:bg-slate-900 rounded-lg px-2 py-2">
+                                <div class="text-lg font-bold text-gray-800 dark:text-gray-100" id="localStoreTotal">0</div>
+                                <div class="text-[10px] text-gray-400">စုစုပေါင်း</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-slate-900 rounded-lg px-2 py-2">
+                                <div class="text-lg font-bold text-indigo-600 dark:text-indigo-300" id="localStoreWeek">0</div>
+                                <div class="text-[10px] text-gray-400">ဒီ 1 ပတ်</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-slate-900 rounded-lg px-2 py-2">
+                                <div class="text-lg font-bold text-purple-600 dark:text-purple-300" id="localStoreMonth">0</div>
+                                <div class="text-[10px] text-gray-400">ဒီ 1 လ</div>
+                            </div>
+                        </div>
+                        <a href="/api/local_store_download"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition active:scale-95 shadow-md text-center inline-flex items-center justify-center gap-1.5">
+                            <i class="fas fa-download"></i> Download ဒေါင်းဆွဲမည်
+                        </a>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="deleteLocalStore('week')"
+                                class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-lg text-xs transition active:scale-95 border border-red-100">
+                                <i class="fas fa-trash-alt mr-1"></i> တစ်ပတ်တာ ဖျက်ရန်
+                            </button>
+                            <button onclick="deleteLocalStore('month')"
+                                class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-lg text-xs transition active:scale-95 border border-red-100">
+                                <i class="fas fa-trash-alt mr-1"></i> တစ်လတာ ဖျက်ရန်
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-red-400"><i class="fas fa-exclamation-triangle mr-1"></i>မဖျက်ခင်အရင် အရင်ဆုံး Download ဒေါင်းဆွဲပြီးမှ ဖျက်ပါ</p>
+                        <div id="localStoreMsg" class="hidden text-xs font-medium rounded-lg px-3 py-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Group: About -->
+        <section class="settings-group">
+            <h2 class="settings-group-title"><i class="fas fa-info-circle"></i> About</h2>
+            <div class="settings-group-body">
+        <!-- About -->
+        <div class="settings-item bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
+            <button type="button" class="settings-toggle w-full px-4 py-3 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-900 transition text-left">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900 flex items-center justify-center text-blue-500 dark:text-blue-300 shrink-0">
+                    <i class="fas fa-info-circle text-lg"></i>
+                </div>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">About</span>
+                    <span class="block text-[11px] text-gray-400">App, Version &amp; Developer</span>
+                </span>
+                <i class="settings-chevron fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            <div class="settings-body">
+                <div>
+                    <div class="p-4 space-y-2 border-t border-gray-100 dark:border-slate-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">App</span>
+                            <span class="text-sm font-bold text-gray-800 dark:text-gray-100">2DAP-3SPRO</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Version</span>
+                            <span class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ app_version }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Developer</span>
+                            <span class="text-sm font-bold text-gray-800 dark:text-gray-100">DeeLiso</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </section>
+
+        <!-- Logout -->
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl text-sm transition active:scale-95 shadow-md">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+        </form>
+
+    </main>
+
+    <script>
+        async function changePassword() {
+            const oldPw = document.getElementById('oldPassword').value.trim();
+            const newPw = document.getElementById('newPassword').value.trim();
+            const confirmPw = document.getElementById('confirmPassword').value.trim();
+            const msgEl = document.getElementById('pwMsg');
+
+            msgEl.classList.add('hidden');
+
+            if (!oldPw || !newPw || !confirmPw) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'Please fill all fields';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (newPw !== confirmPw) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'New passwords do not match';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (newPw.length < 4) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'Password must be at least 4 characters';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/change_password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.getElementById('csrfToken').value},
+                    body: JSON.stringify({old_password: oldPw, new_password: newPw})
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200';
+                    msgEl.textContent = 'Password changed successfully!';
+                    msgEl.classList.remove('hidden');
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                    msgEl.textContent = data.error || 'Failed';
+                    msgEl.classList.remove('hidden');
+                }
+            } catch(e) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'Network error';
+                msgEl.classList.remove('hidden');
+            }
+        }
+
+        async function bettorChangePassword() {
+            const oldPw = document.getElementById('bettorOldPassword').value.trim();
+            const newPw = document.getElementById('bettorNewPassword').value.trim();
+            const confirmPw = document.getElementById('bettorConfirmPassword').value.trim();
+            const msgEl = document.getElementById('bettorPwMsg');
+
+            msgEl.classList.add('hidden');
+
+            if (!oldPw || !newPw || !confirmPw) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'Please fill all fields';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (newPw !== confirmPw) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'New passwords do not match';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (newPw.length < 4) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'Password must be at least 4 characters';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/bettor/change_password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.getElementById('csrfToken').value},
+                    body: JSON.stringify({old_password: oldPw, new_password: newPw})
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200';
+                    msgEl.textContent = 'Password changed successfully!';
+                    msgEl.classList.remove('hidden');
+                    document.getElementById('bettorOldPassword').value = '';
+                    document.getElementById('bettorNewPassword').value = '';
+                    document.getElementById('bettorConfirmPassword').value = '';
+                } else {
+                    msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                    msgEl.textContent = data.error || 'Failed';
+                    msgEl.classList.remove('hidden');
+                }
+            } catch(e) {
+                msgEl.className = 'text-xs font-medium rounded-lg px-3 py-2 bg-red-50 text-red-600 border border-red-200';
+                msgEl.textContent = 'Network error';
+                msgEl.classList.remove('hidden');
+            }
+        }
+
+        // ===== Limit Management =====
+        let specLimits = {{ specific_limits_json|safe }};
+
+        function renderSpecLimits() {
+            const el = document.getElementById('specLimitsList');
+            if (!el) return;
+            const entries = Object.entries(specLimits).sort((a,b) => a[0].localeCompare(b[0]));
+            if (!entries.length) { el.innerHTML = '<p class="text-xs text-gray-400 italic">No specific limits set</p>'; return; }
+            el.innerHTML = entries.map(([num, limit]) => `
+                <div class="flex items-center justify-between bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                    <span class="text-sm font-bold text-red-700">${num}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-gray-600">${limit.toLocaleString()}</span>
+                        <button onclick="deleteSpecLimit('${num}')" class="text-red-400 hover:text-red-600 transition p-1">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showLimitMsg(ok, text) {
+            const el = document.getElementById('limitMsg');
+            el.className = 'text-xs font-medium rounded-lg px-3 py-2 ' + (ok ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200');
+            el.textContent = text;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+
+        async function setGlobalLimit() {
+            const val = parseInt(document.getElementById('globalLimitInput').value);
+            if (!val || val <= 0) return showLimitMsg(false, 'Enter a valid limit amount');
+            const fd = new FormData();
+            fd.append('limit', val);
+            const res = await fetch('/api/set_global_limit', { method: 'POST', headers: {'X-CSRFToken': document.getElementById('csrfToken').value}, body: fd });
+            const data = await res.json();
+            if (data.ok) showLimitMsg(true, 'Global limit set to ' + val.toLocaleString());
+            else showLimitMsg(false, data.error || 'Failed');
+        }
+
+        async function deleteSpecLimit(num) {
+            const fd = new FormData();
+            fd.append('num', num);
+            const res = await fetch('/api/delete_specific_limit', { method: 'POST', headers: {'X-CSRFToken': document.getElementById('csrfToken').value}, body: fd });
+            const data = await res.json();
+            if (data.ok) {
+                delete specLimits[num];
+                renderSpecLimits();
+                showLimitMsg(true, 'Removed limit for ' + num);
+            }
+        }
+
+        // ===== Clear All Data =====
+        function showClearMsg(ok, text) {
+            const el = document.getElementById('clearMsg');
+            el.className = 'text-xs font-medium rounded-lg px-3 py-2 ' + (ok ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200');
+            el.textContent = text;
+            el.classList.remove('hidden');
+        }
+
+        async function clearAllData() {
+            if (!confirm('Are you sure? All data will be cleared and moved to Local Store!')) return;
+            const res = await fetch('/api/clear_all', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.getElementById('csrfToken').value}, body: '{}' });
+            const data = await res.json();
+            if (data.ok) {
+                showClearMsg(true, 'All data moved to Local Store!');
+                refreshLocalStore();
+            }
+            else showClearMsg(false, data.error || 'Failed');
+        }
+
+        // ===== Local Store =====
+        async function refreshLocalStore() {
+            try {
+                const res = await fetch('/api/local_store_info');
+                const d = await res.json();
+                if (!d.ok) return;
+                const t = document.getElementById('localStoreTotal');
+                const w = document.getElementById('localStoreWeek');
+                const m = document.getElementById('localStoreMonth');
+                if (t) t.textContent = d.total.toLocaleString();
+                if (w) w.textContent = d.last_week.toLocaleString();
+                if (m) m.textContent = d.last_month.toLocaleString();
+            } catch(e) {}
+        }
+
+        function showLocalMsg(ok, text) {
+            const el = document.getElementById('localStoreMsg');
+            el.className = 'text-xs font-medium rounded-lg px-3 py-2 ' + (ok ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200');
+            el.textContent = text;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3500);
+        }
+
+        async function deleteLocalStore(period) {
+            const label = period === 'week' ? 'ဒီ 1 ပတ်အတွင်း' : 'ဒီ 1 လအတွင်း';
+            if (!confirm('အရင်ဆုံး Download ဒေါင်းဆွဲပြီးမှ ဖျက်ပါ!\n\nLocal Store ထဲက ' + label + ' စာရင်းများ (' + (period === 'week' ? document.getElementById('localStoreWeek').textContent : document.getElementById('localStoreMonth').textContent) + ' ခု) ကို ဖျက်မှာဖြစ်ပါတယ်။ ဖျက်တာ သေချာပါသလား?')) return;
+            const res = await fetch('/api/local_store_delete', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.getElementById('csrfToken').value}, body: JSON.stringify({period: period}) });
+            const d = await res.json();
+            if (d.ok) {
+                showLocalMsg(true, 'Deleted ' + d.deleted + ' records');
+                document.getElementById('localStoreTotal').textContent = d.total.toLocaleString();
+                document.getElementById('localStoreWeek').textContent = d.last_week.toLocaleString();
+                document.getElementById('localStoreMonth').textContent = d.last_month.toLocaleString();
+            } else {
+                showLocalMsg(false, d.error || 'Failed');
+            }
+        }
+
+        // ===== Font Size =====
+        const fontSlider = document.getElementById('fontSizeSlider');
+        const fontValue = document.getElementById('fontSizeValue');
+        if (fontSlider) {
+            const saved = localStorage.getItem('fontSize') || '16';
+            fontSlider.value = saved;
+            fontValue.textContent = saved + 'px';
+            document.documentElement.style.fontSize = saved + 'px';
+            fontSlider.addEventListener('input', (e) => {
+                const v = e.target.value;
+                fontValue.textContent = v + 'px';
+                document.documentElement.style.fontSize = v + 'px';
+                localStorage.setItem('fontSize', v);
+            });
+        }
+
+        // ===== Dark Mode =====
+        const darkToggle = document.getElementById('darkModeToggle');
+        const darkKnob = document.getElementById('darkModeKnob');
+        const darkState = document.getElementById('darkModeState');
+        function applyDark(dark) {
+            document.documentElement.classList.toggle('dark', dark);
+            if (dark) {
+                darkToggle.classList.remove('bg-gray-300');
+                darkToggle.classList.add('bg-indigo-600');
+                darkKnob.style.transform = 'translateX(20px)';
+                darkState.textContent = 'On';
+            } else {
+                darkToggle.classList.remove('bg-indigo-600');
+                darkToggle.classList.add('bg-gray-300');
+                darkKnob.style.transform = 'translateX(0px)';
+                darkState.textContent = 'Off';
+            }
+        }
+        if (darkToggle) {
+            const savedDark = localStorage.getItem('darkMode') === '1';
+            applyDark(savedDark);
+            darkToggle.addEventListener('click', () => {
+                const dark = !document.documentElement.classList.contains('dark');
+                applyDark(dark);
+                localStorage.setItem('darkMode', dark ? '1' : '0');
+            });
+        }
+
+        // ===== Init =====
+        renderSpecLimits();
+        refreshLocalStore();
+
+        // ===== Operation Log =====
+        const logList = document.getElementById('logList');
+        const LOGS = {{ logs_json| safe }};
+        if (logList) {
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+            if (!LOGS.length) {
+                logList.innerHTML = '<li class="text-gray-400 italic">No records yet.</li>';
+            } else {
+                LOGS.forEach((l) => {
+                    const li = document.createElement('li');
+                    li.className = 'py-1 border-b border-gray-100 dark:border-slate-700 last:border-0 break-words';
+                    if (l.is_error) {
+                        li.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i> <span class="text-red-600 font-medium">Ignored/Invalid:</span> ${esc(l.original)}`;
+                    } else {
+                        li.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i> Added: [${esc(l.formula)}] ${esc(l.count)} numbers x ${esc(l.amount)} Ks`;
+                    }
+                    logList.appendChild(li);
+                });
+            }
+        }
+
+        // ===== Settings Accordion =====
+        document.querySelectorAll('.settings-toggle').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const body = btn.parentElement.querySelector('.settings-body');
+                const isOpen = body.classList.contains('open');
+                document.querySelectorAll('.settings-body.open').forEach((b) => {
+                    b.classList.remove('open');
+                    b.parentElement.querySelector('.settings-toggle').classList.remove('open');
+                });
+                if (!isOpen) {
+                    body.classList.add('open');
+                    btn.classList.add('open');
+                }
+            });
+        });
+    </script>
+
+    <footer class="w-full mt-auto bg-slate-900 text-gray-400">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-2 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:pb-2 flex flex-row items-center justify-center gap-3">
+            <a href="https://github.com/DeeLiso" target="_blank" rel="noopener noreferrer" title="GitHub"
+                class="flex items-center justify-center w-7 h-7 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                <i class="fab fa-github text-sm"></i>
+            </a>
+            <a href="viber://chat?number=%2B959446534581" title="Viber"
+                class="flex items-center justify-center w-7 h-7 rounded-full bg-purple-700 hover:bg-purple-600 text-white transition">
+                <i class="fab fa-viber text-sm"></i>
+            </a>
+        </div>
+    </footer>
+
+    <script src="/static/js/pwa.js" defer></script>
+</body>
+</html>

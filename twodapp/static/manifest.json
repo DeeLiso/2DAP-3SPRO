@@ -1,0 +1,63 @@
+{
+    "name": "2DAP-3SPRO",
+    "short_name": "2DAP-3SPRO",
+    "description": "Myanmar 2D lottery formula parser, owner and player console",
+    "lang": "my",
+    "dir": "ltr",
+    "id": "/app/",
+    "start_url": "/app/",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": ["standalone", "minimal-ui", "browser"],
+    "background_color": "#ffffff",
+    "theme_color": "#4338ca",
+    "orientation": "portrait-primary",
+    "categories": ["utilities", "productivity", "business"],
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "/static/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/icon-192-maskable.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/static/icon-512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Admin Only (CP)",
+            "short_name": "Admin",
+            "url": "/app/admin/",
+            "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Owner",
+            "short_name": "Owner",
+            "url": "/bet/?type=dealer",
+            "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Players",
+            "short_name": "Players",
+            "url": "/bet/login/",
+            "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192" }]
+        }
+    ]
+}
