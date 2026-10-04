@@ -892,7 +892,8 @@
             }
         }
         if (darkToggle) {
-            const savedDark = localStorage.getItem('darkMode') === '1';
+            const stored = localStorage.getItem('darkMode');
+            const savedDark = stored === null ? true : stored === '1';
             applyDark(savedDark);
             darkToggle.addEventListener('click', () => {
                 const dark = !document.documentElement.classList.contains('dark');
