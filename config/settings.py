@@ -10,7 +10,7 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 APP_VERSION = os.environ.get('APP_VERSION', '2.0.0')
 
 # Bump whenever frontend/src is rebuilt so browsers and the service worker fetch the new bundle.
-STATIC_ASSET_VERSION = os.environ.get('STATIC_ASSET_VERSION', '8')
+STATIC_ASSET_VERSION = os.environ.get('STATIC_ASSET_VERSION', '9')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 

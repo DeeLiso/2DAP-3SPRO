@@ -1,4 +1,4 @@
-const VERSION = 'v8';
+const VERSION = 'v9';
 const STATIC_CACHE = `2d-parser-static-${VERSION}`;
 const OFFLINE_URL = '/static/offline.html';
 

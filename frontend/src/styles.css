@@ -1210,6 +1210,339 @@ p {
   --chrome-deep: #7a0c2c;
 }
 
+/* ===== Admin dark surfaces =====
+   The control center is a light design system built on the :root tokens
+   above, but a fair amount of it reaches for a literal white or pastel
+   instead of a token. Darkening therefore happens in two parts: retint the
+   tokens, then override the literals that would otherwise punch light panels
+   back through the page.
+
+   The token override hangs off :root:has(.admin-page) rather than
+   .admin-page so that html and body pick up the dark backdrop too — they
+   paint the area behind the app and would otherwise leave a pale overscroll
+   band around a dark page. :has() keeps this scoped to the admin screens;
+   the role gateway and sign-in pages stay light.
+
+   --canvas-base stays deliberately neutral rather than following the active
+   accent: the page itself paints --accent-soft-2, so tinting the backdrop to
+   match would only add a glow behind the edges. */
+:root:has(.admin-page) {
+  --ink: #e8f1ec;
+  --ink-soft: #a8bdb2;
+  --canvas: #0f1613;
+  --canvas-base: #0f1613;
+  --surface: #16211c;
+  --surface-soft: #1b2823;
+  --line: #2a3a33;
+  --line-strong: #3a4d44;
+  --muted: #8fa79b;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  --shadow-small: 0 4px 14px rgba(0, 0, 0, 0.38);
+  color-scheme: dark;
+}
+:root:has(.admin-page) body {
+  background: var(--canvas-base);
+}
+
+/* Accent tints are mixed against the page, so each theme needs a dark
+   counterpart or the canvas turns into a pale wash.
+
+   Each rule carries two selectors on purpose. The :root form paints the
+   html/body backdrop, but .admin-page[data-accent] declares --accent-soft
+   on the element itself, and a local declaration always beats an inherited
+   one — so the .admin-page half is what actually retints the page. */
+:root:has(.admin-page[data-accent='teal']),
+.admin-page[data-accent='teal'] {
+  --accent-soft: #16302b;
+  --accent-soft-2: #12241f;
+}
+:root:has(.admin-page[data-accent='indigo']),
+.admin-page[data-accent='indigo'] {
+  --accent-soft: #1e2246;
+  --accent-soft-2: #171a33;
+}
+:root:has(.admin-page[data-accent='ocean']),
+.admin-page[data-accent='ocean'] {
+  --accent-soft: #14303f;
+  --accent-soft-2: #102533;
+}
+:root:has(.admin-page[data-accent='violet']),
+.admin-page[data-accent='violet'] {
+  --accent-soft: #271a44;
+  --accent-soft-2: #1f1534;
+}
+:root:has(.admin-page[data-accent='amber']),
+.admin-page[data-accent='amber'] {
+  --accent-soft: #3a2611;
+  --accent-soft-2: #2d1e0e;
+}
+:root:has(.admin-page[data-accent='crimson']),
+.admin-page[data-accent='crimson'] {
+  --accent-soft: #3d1420;
+  --accent-soft-2: #2f0f18;
+}
+
+/* Literal surfaces and pastel fills, retinted for the dark canvas. */
+.admin-page .system-strip {
+  color: var(--muted);
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+.admin-page .system-strip-pulse {
+  color: #7fd4bb;
+}
+.admin-page .system-strip-right {
+  color: var(--muted);
+}
+.admin-page .access-card-icon {
+  color: #7fd4bb;
+  border-color: #2a4a41;
+  background: #16241f;
+}
+.admin-page .access-card-foot {
+  color: #b6c9be;
+}
+.admin-page .heading-signal {
+  color: #7fd4bb;
+  border-color: #2a4a41;
+  background: #16241f;
+}
+.admin-page .admin-tabs {
+  border-color: var(--line);
+  background: #131d19;
+}
+.admin-page .admin-tab.is-active {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.4);
+}
+.admin-page .metric-icon {
+  color: var(--teal);
+  background: #16302b;
+}
+.admin-page .metric-card-owner .metric-icon {
+  color: #f0b357;
+  background: #3a2611;
+}
+.admin-page .metric-card-player .metric-icon {
+  color: #4ade9f;
+  background: #123528;
+}
+.admin-page .metric-card-balance .metric-icon {
+  color: #7fb0ff;
+  background: #16294a;
+}
+.admin-page .control-map-row {
+  color: var(--ink);
+  border-color: var(--line);
+  background: #131d19;
+}
+.admin-page .control-map-row:hover {
+  background: #1a2721;
+}
+.admin-page .control-map-icon-owner {
+  color: #f0b357;
+  background: #3a2611;
+}
+.admin-page .control-map-icon-player {
+  color: #4ade9f;
+  background: #123528;
+}
+.admin-page .directory-toolbar {
+  border-color: var(--line);
+  background: #131d19;
+}
+.admin-page .search-field,
+.admin-page .filter-select {
+  color: var(--ink);
+  border-color: var(--line-strong);
+  background: var(--surface);
+  box-shadow: none;
+}
+.admin-page .icon-button,
+.admin-page .row-action {
+  color: #b6c9be;
+  border-color: var(--line);
+  background: var(--surface);
+}
+.admin-page .icon-button:hover:not(:disabled) {
+  background: #1f2e27;
+}
+.admin-page .account-row {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.admin-page .account-row:hover {
+  background: #1b2823;
+}
+.admin-page .account-avatar-owner {
+  color: #f0b357;
+  background: #3a2611;
+}
+.admin-page .account-avatar-super {
+  color: #ffd9a0;
+  background: #4a3212;
+}
+.admin-page .account-avatar-player {
+  color: #4ade9f;
+  background: #123528;
+}
+.admin-page .you-pill {
+  color: #a9c6ff;
+  background: #16294a;
+}
+.admin-page .status-pill-active {
+  color: #6ee7b7;
+  background: #0f3327;
+}
+.admin-page .status-pill-suspended {
+  color: #fca5a5;
+  background: #3d1618;
+}
+.admin-page .role-pill-staff,
+.admin-page .role-pill-player {
+  color: #6ee7b7;
+  background: #0f3327;
+}
+.admin-page .role-pill-owner,
+.admin-page .role-pill-super {
+  color: #f0b357;
+  background: #3a2611;
+}
+.admin-page .role-pill-suspend {
+  color: #fca5a5;
+  background: #3d1618;
+}
+.admin-page .role-pill-multiplier {
+  color: #e8c07a;
+  background: rgba(214, 158, 46, 0.18);
+  border-color: rgba(214, 158, 46, 0.42);
+}
+.admin-page .row-action.row-action-delete-labeled {
+  color: #fca5a5;
+  border-color: #4d2020;
+  background: #2a1416;
+}
+.admin-page .row-action-edit:hover:not(:disabled) {
+  background: #16302b;
+}
+.admin-page .row-action-key:hover:not(:disabled) {
+  background: #16294a;
+}
+.admin-page .row-action-suspend:hover:not(:disabled),
+.admin-page .row-action-delete:hover:not(:disabled) {
+  background: #3d1618;
+}
+.admin-page .row-action-activate:hover:not(:disabled) {
+  background: #0f3327;
+}
+.admin-page .state-error {
+  color: #fca5a5;
+  border-color: #4d2020;
+  background: #2a1416;
+}
+.admin-page .state-icon-danger {
+  color: #fca5a5;
+}
+.admin-page .empty-state-icon {
+  color: #b6c9be;
+  background: #1b2823;
+}
+.admin-page .button-secondary {
+  color: var(--ink-soft);
+  border-color: var(--line);
+  background: var(--surface);
+}
+.admin-page .button-secondary:hover:not(:disabled) {
+  background: #1f2e27;
+}
+.admin-page .modal-panel {
+  border-color: var(--line);
+  background: #16211c;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+}
+.admin-page .field {
+  color: var(--ink-soft);
+}
+.admin-page .field input,
+.admin-page .field select,
+.admin-page .field textarea {
+  color: var(--ink);
+  border-color: var(--line-strong);
+  background: #111b17;
+}
+.admin-page .field input:focus,
+.admin-page .field select:focus,
+.admin-page .field textarea:focus {
+  border-color: var(--teal);
+}
+.admin-page .field input[readonly] {
+  background: #131d19;
+}
+.admin-page .multiplier-option.is-active {
+  border-color: var(--teal);
+  background: #16302b;
+}
+.admin-page .switch-track {
+  background: #3a4d44;
+}
+.admin-page .check-card {
+  color: var(--ink-soft);
+  border-color: var(--line);
+  background: #131d19;
+}
+.admin-page .check-card-icon {
+  color: var(--teal);
+  background: #16302b;
+}
+.admin-page .check-card-icon-admin {
+  color: #f0b357;
+  background: #3a2611;
+}
+.admin-page .confirm-icon {
+  color: #fca5a5;
+  background: #3d1618;
+}
+.admin-page .toast-notice {
+  border-color: var(--line);
+  background: #1b2823;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+.admin-page .toast-notice-error {
+  border-color: #4d2020;
+  background: #2a1416;
+}
+.admin-page .toast-notice-mark {
+  background: #16302b;
+}
+.admin-page .toast-notice-error .toast-notice-mark {
+  background: #3d1618;
+}
+.admin-page .toast-notice button:hover {
+  background: #24352d;
+}
+.admin-page .access-denied-card {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.admin-page .access-denied-icon {
+  color: #f0b357;
+  background: #3a2611;
+}
+.admin-page .header-user-copy strong {
+  color: #effbf5;
+}
+.admin-page .account-meta svg {
+  color: #8fa79b;
+}
+.admin-page .sidebar-accent-swatch {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.admin-page .mobile-action-bar {
+  border-color: var(--line);
+  background: #16211c;
+}
+
 .admin-atmosphere {
   position: fixed;
   z-index: 0;
