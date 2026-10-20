@@ -2,4 +2,3 @@ Django>=5.2,<6.0
 gunicorn
 whitenoise
 psycopg2-binary
-mysqlclient>=2.2,<3.0
